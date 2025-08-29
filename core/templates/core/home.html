@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Banking Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="jumbotron bg-primary text-white p-5 rounded">
+            <h1 class="display-4">Welcome to Banking Platform</h1>
+            <p class="lead">Your secure and reliable banking solution for all your financial needs.</p>
+            {% if not user.is_authenticated %}
+                <hr class="my-4">
+                <p>Get started by creating an account or logging in to access your banking services.</p>
+                <a class="btn btn-light btn-lg me-3" href="#" role="button">
+                    <i class="fas fa-user-plus"></i> Register
+                </a>
+                <a class="btn btn-outline-light btn-lg" href="#" role="button">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            {% else %}
+                <hr class="my-4">
+                <p>Welcome back, {{ user.first_name|default:user.username }}!</p>
+                <a class="btn btn-light btn-lg" href="#" role="button">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Secure Banking</h5>
+                <p class="card-text">Your financial data is protected with industry-standard security measures and encryption.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-exchange-alt fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Easy Transactions</h5>
+                <p class="card-text">Deposit, withdraw, and transfer funds with our simple and intuitive interface.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Track Your Money</h5>
+                <p class="card-text">Monitor your transactions and download statements to keep track of your finances.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

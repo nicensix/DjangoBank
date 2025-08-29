@@ -1,0 +1,96 @@
+/* Custom styles for Banking Platform */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.jumbotron {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 500;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Form styling */
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Dashboard specific styles */
+.dashboard-card {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.balance-display {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Transaction styles */
+.transaction-item {
+    border-left: 4px solid #007bff;
+    background-color: white;
+    margin-bottom: 10px;
+    border-radius: 0 10px 10px 0;
+}
+
+.transaction-deposit {
+    border-left-color: #28a745;
+}
+
+.transaction-withdrawal {
+    border-left-color: #dc3545;
+}
+
+.transaction-transfer {
+    border-left-color: #ffc107;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .balance-display {
+        font-size: 2rem;
+    }
+    
+    .jumbotron {
+        padding: 2rem 1rem;
+    }
+}
