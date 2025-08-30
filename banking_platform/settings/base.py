@@ -20,6 +20,9 @@ DJANGO_APPS = [
 
 LOCAL_APPS = [
     'core',
+    'accounts',
+    'transactions',
+    'admin_panel',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
@@ -42,6 +45,9 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR / 'templates',
             BASE_DIR / 'core' / 'templates',
+            BASE_DIR / 'accounts' / 'templates',
+            BASE_DIR / 'transactions' / 'templates',
+            BASE_DIR / 'admin_panel' / 'templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
