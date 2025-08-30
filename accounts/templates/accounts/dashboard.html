@@ -1,0 +1,172 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Dashboard - Banking Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Welcome Section -->
+    <div class="col-12 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h2 class="card-title mb-1">Welcome, {{ user.first_name|default:user.username }}!</h2>
+                <p class="card-text mb-0">Manage your banking operations from your dashboard.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Account Information -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+                {% if bank_account %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Account Number</h6>
+                            <p class="h5 font-monospace">{{ bank_account.account_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Account Type</h6>
+                            <p class="h5">{{ bank_account.get_account_type_display }}</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Current Balance</h6>
+                            <p class="h4 text-success">${{ bank_account.balance|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Account Status</h6>
+                            {% if bank_account.status == 'active' %}
+                                <span class="badge bg-success fs-6">{{ bank_account.get_status_display }}</span>
+                            {% elif bank_account.status == 'pending' %}
+                                <span class="badge bg-warning fs-6">{{ bank_account.get_status_display }}</span>
+                            {% elif bank_account.status == 'frozen' %}
+                                <span class="badge bg-danger fs-6">{{ bank_account.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6">{{ bank_account.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Account Created</h6>
+                            <p>{{ bank_account.created_at|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Last Updated</h6>
+                            <p>{{ bank_account.updated_at|date:"F d, Y g:i A" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if bank_account.status == 'pending' %}
+                        <div class="alert alert-warning mt-3">
+                            <strong>Account Pending Approval:</strong> Your account is currently pending approval. 
+                            You will be able to perform transactions once your account is approved by our team.
+                        </div>
+                    {% elif bank_account.status == 'frozen' %}
+                        <div class="alert alert-danger mt-3">
+                            <strong>Account Frozen:</strong> Your account has been temporarily frozen. 
+                            Please contact support for assistance.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-warning">
+                        <strong>No Bank Account Found:</strong> 
+                        It appears you don't have a bank account associated with your profile. 
+                        Please contact support for assistance.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                {% if bank_account and bank_account.status == 'active' %}
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-success">
+                            💰 Deposit Money
+                        </a>
+                        <a href="#" class="btn btn-warning">
+                            💸 Withdraw Money
+                        </a>
+                        <a href="#" class="btn btn-primary">
+                            🔄 Transfer Money
+                        </a>
+                        <a href="#" class="btn btn-info">
+                            📊 Transaction History
+                        </a>
+                        <a href="#" class="btn btn-secondary">
+                            📄 Download Statement
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <p>Banking operations will be available once your account is approved and active.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Account Summary -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Account Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h6 class="text-muted mb-1">Total Deposits</h6>
+                            <p class="h6 text-success mb-0">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-muted mb-1">Total Withdrawals</h6>
+                        <p class="h6 text-danger mb-0">$0.00</p>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <div class="text-center">
+                    <h6 class="text-muted mb-1">Transactions This Month</h6>
+                    <p class="h6 mb-0">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity (Placeholder) -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Activity</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="text-center text-muted py-4">
+                    <p class="mb-0">No recent transactions to display.</p>
+                    <small>Your transaction history will appear here once you start banking.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

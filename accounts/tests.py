@@ -321,3 +321,348 @@ class BankAccountModelTest(TestCase):
         self.assertEqual(BankAccount._meta.verbose_name, 'Bank Account')
         self.assertEqual(BankAccount._meta.verbose_name_plural, 'Bank Accounts')
         self.assertEqual(BankAccount._meta.ordering, ['-created_at'])
+
+# Import additional modules for view and form tests
+from django.test import Client
+from django.urls import reverse
+from .forms import UserRegistrationForm, UserLoginForm
+
+
+class UserRegistrationFormTest(TestCase):
+    """Test cases for UserRegistrationForm."""
+    
+    def test_valid_registration_form(self):
+        """Test form with valid data."""
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password1': 'testpass123',
+            'password2': 'testpass123',
+            'account_type': 'savings'
+        }
+        form = UserRegistrationForm(data=form_data)
+        self.assertTrue(form.is_valid())
+    
+    def test_duplicate_username(self):
+        """Test form with duplicate username."""
+        User.objects.create_user(username='testuser', email='existing@example.com')
+        
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password1': 'testpass123',
+            'password2': 'testpass123',
+            'account_type': 'savings'
+        }
+        form = UserRegistrationForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('username', form.errors)
+    
+    def test_duplicate_email(self):
+        """Test form with duplicate email."""
+        User.objects.create_user(username='existing', email='test@example.com')
+        
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password1': 'testpass123',
+            'password2': 'testpass123',
+            'account_type': 'savings'
+        }
+        form = UserRegistrationForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+    
+    def test_password_mismatch(self):
+        """Test form with mismatched passwords."""
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password1': 'testpass123',
+            'password2': 'differentpass',
+            'account_type': 'savings'
+        }
+        form = UserRegistrationForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('password2', form.errors)
+    
+    def test_form_save_creates_bank_account(self):
+        """Test that saving form creates user and bank account."""
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password1': 'testpass123',
+            'password2': 'testpass123',
+            'account_type': 'current'
+        }
+        form = UserRegistrationForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        
+        user = form.save()
+        self.assertEqual(user.username, 'testuser')
+        self.assertEqual(user.email, 'test@example.com')
+        self.assertEqual(user.first_name, 'Test')
+        self.assertEqual(user.last_name, 'User')
+        
+        # Check bank account was created
+        bank_account = BankAccount.objects.get(user=user)
+        self.assertEqual(bank_account.account_type, 'current')
+        self.assertEqual(bank_account.status, 'pending')
+        self.assertEqual(bank_account.balance, 0.00)
+
+
+class UserLoginFormTest(TestCase):
+    """Test cases for UserLoginForm."""
+    
+    def setUp(self):
+        """Set up test user."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123',
+            email='test@example.com'
+        )
+    
+    def test_valid_login_form(self):
+        """Test form with valid credentials."""
+        form_data = {
+            'username': 'testuser',
+            'password': 'testpass123'
+        }
+        form = UserLoginForm(data=form_data)
+        self.assertTrue(form.is_valid())
+    
+    def test_invalid_credentials(self):
+        """Test form with invalid credentials."""
+        form_data = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+        form = UserLoginForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('Invalid username or password', str(form.errors))
+    
+    def test_inactive_user(self):
+        """Test form with inactive user."""
+        self.user.is_active = False
+        self.user.save()
+        
+        form_data = {
+            'username': 'testuser',
+            'password': 'testpass123'
+        }
+        form = UserLoginForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('This account is inactive', str(form.errors))
+
+
+class RegistrationViewTest(TestCase):
+    """Test cases for registration view."""
+    
+    def setUp(self):
+        """Set up test client."""
+        self.client = Client()
+        self.register_url = reverse('accounts:register')
+    
+    def test_registration_view_get(self):
+        """Test GET request to registration view."""
+        response = self.client.get(self.register_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Create Your Account')
+        self.assertIsInstance(response.context['form'], UserRegistrationForm)
+    
+    def test_registration_view_post_valid(self):
+        """Test POST request with valid data."""
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password1': 'testpass123',
+            'password2': 'testpass123',
+            'account_type': 'savings'
+        }
+        response = self.client.post(self.register_url, data=form_data)
+        
+        # Should redirect to login page
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('accounts:login'))
+        
+        # Check user was created
+        user = User.objects.get(username='testuser')
+        self.assertEqual(user.email, 'test@example.com')
+        
+        # Check bank account was created
+        bank_account = BankAccount.objects.get(user=user)
+        self.assertEqual(bank_account.account_type, 'savings')
+        self.assertEqual(bank_account.status, 'pending')
+    
+    def test_registration_view_post_invalid(self):
+        """Test POST request with invalid data."""
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'invalid-email',
+            'password1': 'testpass123',
+            'password2': 'differentpass',
+            'account_type': 'savings'
+        }
+        response = self.client.post(self.register_url, data=form_data)
+        
+        # Should stay on registration page
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Please correct the errors below')
+        
+        # Check user was not created
+        self.assertFalse(User.objects.filter(username='testuser').exists())
+    
+    def test_authenticated_user_redirect(self):
+        """Test that authenticated users are redirected from registration."""
+        user = User.objects.create_user(username='testuser', password='testpass123')
+        self.client.login(username='testuser', password='testpass123')
+        
+        response = self.client.get(self.register_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('accounts:dashboard'))
+
+
+class LoginViewTest(TestCase):
+    """Test cases for login view."""
+    
+    def setUp(self):
+        """Set up test client and user."""
+        self.client = Client()
+        self.login_url = reverse('accounts:login')
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123',
+            first_name='Test'
+        )
+    
+    def test_login_view_get(self):
+        """Test GET request to login view."""
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Welcome Back')
+        self.assertIsInstance(response.context['form'], UserLoginForm)
+    
+    def test_login_view_post_valid(self):
+        """Test POST request with valid credentials."""
+        form_data = {
+            'username': 'testuser',
+            'password': 'testpass123'
+        }
+        response = self.client.post(self.login_url, data=form_data)
+        
+        # Should redirect to dashboard
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('accounts:dashboard'))
+    
+    def test_login_view_post_invalid(self):
+        """Test POST request with invalid credentials."""
+        form_data = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+        response = self.client.post(self.login_url, data=form_data)
+        
+        # Should stay on login page
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Invalid username or password')
+    
+    def test_authenticated_user_redirect(self):
+        """Test that authenticated users are redirected from login."""
+        self.client.login(username='testuser', password='testpass123')
+        
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('accounts:dashboard'))
+
+
+class LogoutViewTest(TestCase):
+    """Test cases for logout view."""
+    
+    def setUp(self):
+        """Set up test client and user."""
+        self.client = Client()
+        self.logout_url = reverse('accounts:logout')
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123',
+            first_name='Test'
+        )
+    
+    def test_logout_view(self):
+        """Test logout functionality."""
+        # Login first
+        self.client.login(username='testuser', password='testpass123')
+        
+        # Then logout
+        response = self.client.get(self.logout_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('accounts:login'))
+        
+        # Check user is logged out
+        response = self.client.get(reverse('accounts:dashboard'))
+        self.assertEqual(response.status_code, 302)  # Should redirect to login
+
+
+class DashboardViewTest(TestCase):
+    """Test cases for dashboard view."""
+    
+    def setUp(self):
+        """Set up test client and user with bank account."""
+        self.client = Client()
+        self.dashboard_url = reverse('accounts:dashboard')
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123',
+            first_name='Test'
+        )
+        self.bank_account = BankAccount.objects.create(
+            user=self.user,
+            account_type='savings',
+            balance=1000.00,
+            status='active'
+        )
+    
+    def test_dashboard_view_authenticated(self):
+        """Test dashboard view for authenticated user."""
+        self.client.login(username='testuser', password='testpass123')
+        
+        response = self.client.get(self.dashboard_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Welcome, Test!')
+        self.assertContains(response, self.bank_account.account_number)
+        self.assertContains(response, '$1000.00')
+    
+    def test_dashboard_view_unauthenticated(self):
+        """Test dashboard view for unauthenticated user."""
+        response = self.client.get(self.dashboard_url)
+        self.assertEqual(response.status_code, 302)
+        # Should redirect to login with next parameter
+        expected_url = f"{reverse('accounts:login')}?next={self.dashboard_url}"
+        self.assertRedirects(response, expected_url)
+    
+    def test_dashboard_view_no_bank_account(self):
+        """Test dashboard view for user without bank account."""
+        user_no_account = User.objects.create_user(
+            username='noaccountuser',
+            password='testpass123',
+            first_name='NoAccount'
+        )
+        self.client.login(username='noaccountuser', password='testpass123')
+        
+        response = self.client.get(self.dashboard_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'No bank account found')
