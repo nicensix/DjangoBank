@@ -7,5 +7,5 @@ from . import views
 app_name = 'admin_panel'
 
 urlpatterns = [
-    # URL patterns will be added as views are implemented
+    path('', views.admin_dashboard, name='dashboard'),
 ]

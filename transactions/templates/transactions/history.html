@@ -1,0 +1,483 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}{{ title }} - Banking Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transaction-row {
+        transition: background-color 0.2s ease;
+    }
+    .transaction-row:hover {
+        background-color: #f8f9fa;
+    }
+    .amount-credit {
+        color: #198754;
+        font-weight: 600;
+    }
+    .amount-debit {
+        color: #dc3545;
+        font-weight: 600;
+    }
+    .balance-display {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+    .filter-card {
+        background-color: #f8f9fa;
+    }
+    .transaction-type-badge {
+        font-size: 0.75em;
+    }
+    .no-transactions {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+    .summary-card {
+        border-left: 4px solid #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Page Header -->
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <h2 class="card-title mb-1">📊 {{ title }}</h2>
+                <p class="card-text mb-0">View and filter your transaction history</p>
+            </div>
+        </div>
+
+        <!-- Account Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Account Number</h6>
+                        <p class="h6 font-monospace mb-0">{{ bank_account.account_number }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Current Balance</h6>
+                        <p class="h5 text-success mb-0">${{ bank_account.balance|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card summary-card">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Total Transactions</h6>
+                        <p class="h5 text-info mb-0">{{ total_transactions }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-success">💰 Deposits</h6>
+                        <p class="h6 mb-0">{{ total_deposits }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-danger">💸 Withdrawals</h6>
+                        <p class="h6 mb-0">{{ total_withdrawals }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">📤 Transfers Sent</h6>
+                        <p class="h6 mb-0">{{ total_transfers_sent }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-info">📥 Transfers Received</h6>
+                        <p class="h6 mb-0">{{ total_transfers_received }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card filter-card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">🔍 Filter Transactions</h6>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <!-- Transaction Type Filter -->
+                    <div class="col-md-3">
+                        <label for="type" class="form-label">Transaction Type</label>
+                        <select name="type" id="type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="deposit" {% if current_type == 'deposit' %}selected{% endif %}>Deposits</option>
+                            <option value="withdrawal" {% if current_type == 'withdrawal' %}selected{% endif %}>Withdrawals</option>
+                            <option value="transfer" {% if current_type == 'transfer' %}selected{% endif %}>Transfers</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div class="col-md-3">
+                        <label for="date_filter" class="form-label">Date Range</label>
+                        <select name="date_filter" id="date_filter" class="form-select">
+                            <option value="">All Time</option>
+                            <option value="7days" {% if current_date_filter == '7days' %}selected{% endif %}>Last 7 Days</option>
+                            <option value="30days" {% if current_date_filter == '30days' %}selected{% endif %}>Last 30 Days</option>
+                            <option value="90days" {% if current_date_filter == '90days' %}selected{% endif %}>Last 90 Days</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Date Range -->
+                    <div class="col-md-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" class="form-control" value="{{ current_start_date }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" name="end_date" id="end_date" class="form-control" value="{{ current_end_date }}">
+                    </div>
+
+                    <!-- Amount Range -->
+                    <div class="col-md-3">
+                        <label for="min_amount" class="form-label">Min Amount ($)</label>
+                        <input type="number" name="min_amount" id="min_amount" class="form-control" step="0.01" min="0" value="{{ current_min_amount }}" placeholder="0.00">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="max_amount" class="form-label">Max Amount ($)</label>
+                        <input type="number" name="max_amount" id="max_amount" class="form-control" step="0.01" min="0" value="{{ current_max_amount }}" placeholder="No limit">
+                    </div>
+
+                    <!-- Filter Actions -->
+                    <div class="col-md-6">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="{% url 'transactions:history' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Transaction History</h6>
+                {% if page_obj.paginator.count > 0 %}
+                    <small class="text-muted">
+                        Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} transactions
+                    </small>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if transaction_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Balance After</th>
+                                    <th>Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in transaction_data %}
+                                <tr class="transaction-row">
+                                    <td>
+                                        <div class="fw-bold">{{ item.transaction.timestamp|date:"M d, Y" }}</div>
+                                        <small class="text-muted">{{ item.transaction.timestamp|time:"g:i A" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if item.transaction.transaction_type == 'deposit' %}
+                                            <span class="badge bg-success transaction-type-badge">💰 Deposit</span>
+                                        {% elif item.transaction.transaction_type == 'withdrawal' %}
+                                            <span class="badge bg-danger transaction-type-badge">💸 Withdrawal</span>
+                                        {% elif item.transaction.transaction_type == 'transfer' %}
+                                            {% if item.is_credit %}
+                                                <span class="badge bg-info transaction-type-badge">📥 Transfer In</span>
+                                            {% else %}
+                                                <span class="badge bg-warning transaction-type-badge">📤 Transfer Out</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ item.description }}</div>
+                                        {% if item.transaction.description %}
+                                            <small class="text-muted">{{ item.transaction.description }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if item.is_credit %}
+                                            <span class="amount-credit">+${{ item.display_amount|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="amount-debit">${{ item.display_amount|floatformat:2 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if item.balance_after is not None %}
+                                            <span class="balance-display">${{ item.balance_after|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="font-monospace text-muted">{{ item.transaction.reference_number }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="no-transactions">
+                        <div class="mb-3">
+                            <i class="fas fa-receipt fa-3x text-muted"></i>
+                        </div>
+                        <h5 class="text-muted">No Transactions Found</h5>
+                        <p class="text-muted">
+                            {% if current_type or current_date_filter or current_start_date or current_end_date or current_min_amount or current_max_amount %}
+                                No transactions match your current filters. Try adjusting your search criteria.
+                            {% else %}
+                                You haven't made any transactions yet. Start by making a deposit or transfer.
+                            {% endif %}
+                        </p>
+                        <div class="mt-3">
+                            <a href="{% url 'transactions:deposit' %}" class="btn btn-success me-2">Make Deposit</a>
+                            <a href="{% url 'transactions:transfer' %}" class="btn btn-primary">Transfer Money</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Transaction history pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+        <!-- Statement Download -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">📄 Download Statement</h6>
+                <p class="card-text small text-muted">Download your transaction history in CSV or PDF format</p>
+                
+                <form method="get" class="row g-2 mb-3" id="downloadForm">
+                    <div class="col-md-4">
+                        <label for="download_start_date" class="form-label small">From Date</label>
+                        <input type="date" name="start_date" id="download_start_date" class="form-control form-control-sm" value="{{ current_start_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="download_end_date" class="form-label small">To Date</label>
+                        <input type="date" name="end_date" id="download_end_date" class="form-control form-control-sm" value="{{ current_end_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">&nbsp;</label>
+                        <div class="d-flex gap-1">
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="downloadStatement('csv')">
+                                📊 CSV
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="downloadStatement('pdf')">
+                                📄 PDF
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info py-2 small">
+                    <strong>Note:</strong> Leave dates empty to download all transactions. Large statements may take a moment to generate.
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mt-4">
+            <div class="card-body text-center">
+                <h6 class="card-title">Quick Actions</h6>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <a href="{% url 'transactions:deposit' %}" class="btn btn-success">💰 Deposit</a>
+                    <a href="{% url 'transactions:withdrawal' %}" class="btn btn-danger">💸 Withdraw</a>
+                    <a href="{% url 'transactions:transfer' %}" class="btn btn-primary">📤 Transfer</a>
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary">🏠 Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit form when date filter changes
+        const dateFilter = document.getElementById('date_filter');
+        if (dateFilter) {
+            dateFilter.addEventListener('change', function() {
+                if (this.value) {
+                    // Clear custom date inputs when using preset filters
+                    document.getElementById('start_date').value = '';
+                    document.getElementById('end_date').value = '';
+                }
+            });
+        }
+
+        // Clear date filter when custom dates are used
+        const startDate = document.getElementById('start_date');
+        const endDate = document.getElementById('end_date');
+        
+        if (startDate) {
+            startDate.addEventListener('change', function() {
+                if (this.value) {
+                    document.getElementById('date_filter').value = '';
+                }
+            });
+        }
+        
+        if (endDate) {
+            endDate.addEventListener('change', function() {
+                if (this.value) {
+                    document.getElementById('date_filter').value = '';
+                }
+            });
+        }
+
+        // Format amount inputs
+        const amountInputs = document.querySelectorAll('input[type="number"][step="0.01"]');
+        amountInputs.forEach(function(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value;
+                if (value && !isNaN(value)) {
+                    // Ensure only 2 decimal places
+                    const parts = value.split('.');
+                    if (parts[1] && parts[1].length > 2) {
+                        e.target.value = parseFloat(value).toFixed(2);
+                    }
+                }
+            });
+        });
+
+        // Add loading state to filter form
+        const filterForm = document.querySelector('form:not(#downloadForm)');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+    });
+
+    // Download statement function
+    function downloadStatement(format) {
+        const form = document.getElementById('downloadForm');
+        const startDate = form.querySelector('input[name="start_date"]').value;
+        const endDate = form.querySelector('input[name="end_date"]').value;
+        
+        // Validate date range
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            alert('Start date cannot be after end date.');
+            return;
+        }
+        
+        // Build URL with parameters
+        let url = '';
+        if (format === 'csv') {
+            url = '{% url "transactions:download_csv_statement" %}';
+        } else if (format === 'pdf') {
+            url = '{% url "transactions:download_pdf_statement" %}';
+        }
+        
+        const params = new URLSearchParams();
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+        
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        // Show loading state
+        const buttons = form.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent.includes(format.toUpperCase())) {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating...';
+            }
+        });
+        
+        // Create hidden iframe for download
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        
+        // Reset buttons after a delay
+        setTimeout(() => {
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                if (btn.textContent.includes('Generating')) {
+                    if (format === 'csv') {
+                        btn.innerHTML = '📊 CSV';
+                    } else {
+                        btn.innerHTML = '📄 PDF';
+                    }
+                }
+            });
+            document.body.removeChild(iframe);
+        }, 3000);
+    }
+</script>
+{% endblock %}

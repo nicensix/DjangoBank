@@ -100,19 +100,19 @@
             <div class="card-body">
                 {% if bank_account and bank_account.status == 'active' %}
                     <div class="d-grid gap-2">
-                        <a href="#" class="btn btn-success">
+                        <a href="{% url 'transactions:deposit' %}" class="btn btn-success">
                             💰 Deposit Money
                         </a>
-                        <a href="#" class="btn btn-warning">
+                        <a href="{% url 'transactions:withdrawal' %}" class="btn btn-warning">
                             💸 Withdraw Money
                         </a>
-                        <a href="#" class="btn btn-primary">
+                        <a href="{% url 'transactions:transfer' %}" class="btn btn-primary">
                             🔄 Transfer Money
                         </a>
-                        <a href="#" class="btn btn-info">
+                        <a href="{% url 'transactions:history' %}" class="btn btn-info">
                             📊 Transaction History
                         </a>
-                        <a href="#" class="btn btn-secondary">
+                        <a href="{% url 'transactions:history' %}" class="btn btn-secondary">
                             📄 Download Statement
                         </a>
                     </div>
@@ -158,7 +158,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Recent Activity</h5>
-                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                <a href="{% url 'transactions:history' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
                 <div class="text-center text-muted py-4">

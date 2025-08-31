@@ -1,0 +1,193 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}{{ title }} - Banking Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Page Header -->
+        <div class="card bg-warning text-dark mb-4">
+            <div class="card-body">
+                <h2 class="card-title mb-1">💸 {{ title }}</h2>
+                <p class="card-text mb-0">Withdraw money from your account safely and securely.</p>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Account Number</h6>
+                        <p class="h6 font-monospace">{{ bank_account.account_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Available Balance</h6>
+                        <p class="h5 text-success">${{ bank_account.balance|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Withdrawal Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Amount Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label">
+                            <strong>Withdrawal Amount</strong>
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.help_text %}
+                            <div class="form-text">{{ form.amount.help_text }}</div>
+                        {% endif %}
+                        {% if form.amount.errors %}
+                            {% for error in form.amount.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Description Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.help_text %}
+                            <div class="form-text">{{ form.description.help_text }}</div>
+                        {% endif %}
+                        {% if form.description.errors %}
+                            {% for error in form.description.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Balance Warning -->
+                    {% if bank_account.balance == 0 %}
+                        <div class="alert alert-warning">
+                            <strong>Insufficient Funds:</strong> Your account balance is $0.00. You cannot make any withdrawals at this time.
+                        </div>
+                    {% elif bank_account.balance < 10 %}
+                        <div class="alert alert-info">
+                            <strong>Low Balance:</strong> Your account balance is low. Please ensure you have sufficient funds for your withdrawal.
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning" {% if bank_account.balance == 0 %}disabled{% endif %}>
+                            💸 Withdraw Money
+                        </button>
+                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="card mt-4 border-warning">
+            <div class="card-body">
+                <h6 class="card-title text-warning">⚠️ Important Notice</h6>
+                <ul class="card-text mb-0 small">
+                    <li>Ensure you have sufficient funds before making a withdrawal</li>
+                    <li>Maximum withdrawal limit: $10,000 per transaction</li>
+                    <li>Withdrawals are processed immediately</li>
+                    <li>Transaction records are maintained for your security</li>
+                    <li>Contact support if you encounter any issues</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add client-side validation and formatting
+    document.addEventListener('DOMContentLoaded', function() {
+        const amountField = document.getElementById('{{ form.amount.id_for_label }}');
+        const availableBalance = {{ bank_account.balance }};
+        
+        if (amountField) {
+            // Format amount as user types
+            amountField.addEventListener('input', function(e) {
+                let value = e.target.value;
+                
+                // Remove any non-digit or decimal characters
+                value = value.replace(/[^0-9.]/g, '');
+                
+                // Ensure only one decimal point
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+                
+                // Limit to 2 decimal places
+                if (parts[1] && parts[1].length > 2) {
+                    value = parts[0] + '.' + parts[1].substring(0, 2);
+                }
+                
+                e.target.value = value;
+            });
+            
+            // Check balance on blur
+            amountField.addEventListener('blur', function(e) {
+                const amount = parseFloat(e.target.value);
+                if (amount > availableBalance) {
+                    // Show warning but don't prevent submission (server will handle it)
+                    e.target.classList.add('is-invalid');
+                    
+                    // Remove existing warning
+                    const existingWarning = e.target.parentElement.querySelector('.balance-warning');
+                    if (existingWarning) {
+                        existingWarning.remove();
+                    }
+                    
+                    // Add warning message
+                    const warning = document.createElement('div');
+                    warning.className = 'text-danger small mt-1 balance-warning';
+                    warning.textContent = `Amount exceeds available balance of $${availableBalance.toFixed(2)}`;
+                    e.target.parentElement.appendChild(warning);
+                } else {
+                    e.target.classList.remove('is-invalid');
+                    const existingWarning = e.target.parentElement.querySelector('.balance-warning');
+                    if (existingWarning) {
+                        existingWarning.remove();
+                    }
+                }
+            });
+            
+            // Add focus styling
+            amountField.addEventListener('focus', function(e) {
+                e.target.parentElement.classList.add('focused');
+            });
+            
+            amountField.addEventListener('blur', function(e) {
+                e.target.parentElement.classList.remove('focused');
+            });
+        }
+    });
+</script>
+{% endblock %}
