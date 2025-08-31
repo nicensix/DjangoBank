@@ -1,0 +1,35 @@
+# Systemd service file for Django Banking Platform
+# Copy this file to /etc/systemd/system/ on your production server
+# Then run: sudo systemctl enable banking-platform && sudo systemctl start banking-platform
+
+[Unit]
+Description=Django Banking Platform
+After=network.target postgresql.service redis.service
+Requires=postgresql.service redis.service
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/banking-platform
+Environment=DJANGO_SETTINGS_MODULE=banking_platform.settings.production
+EnvironmentFile=/opt/banking-platform/.env
+ExecStart=/opt/banking-platform/venv/bin/gunicorn \
+    --config /opt/banking-platform/gunicorn.conf.py \
+    banking_platform.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=banking-platform
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/banking-platform/logs /opt/banking-platform/media
+
+[Install]
+WantedBy=multi-user.target

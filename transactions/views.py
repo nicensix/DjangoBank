@@ -17,6 +17,11 @@ from django.views.decorators.http import require_http_methods
 from accounts.models import BankAccount
 from .forms import DepositForm, WithdrawalForm, TransferForm
 from .models import Transaction
+from core.transaction_utils import (
+    BankingTransactionManager, TransactionError, 
+    InsufficientFundsError, AccountNotActiveError, 
+    ConcurrentTransactionError
+)
 
 # For PDF generation
 try:
@@ -55,26 +60,27 @@ def deposit_view(request):
         return redirect('accounts:dashboard')
     
     if request.method == 'POST':
-        form = DepositForm(request.POST)
+        form = DepositForm(request.POST, request=request)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             description = form.cleaned_data['description']
             
             try:
-                # Use database transaction to ensure atomicity
-                with transaction.atomic():
-                    # Update account balance
-                    bank_account.balance += amount
-                    bank_account.save()
-                    
-                    # Create transaction record
-                    Transaction.objects.create(
-                        transaction_type='deposit',
-                        amount=amount,
-                        description=description,
-                        receiver_account=bank_account,
-                        receiver_balance_after=bank_account.balance
-                    )
+                # Use enhanced atomic transaction processing
+                transaction_record = BankingTransactionManager.process_deposit(
+                    bank_account.account_number,
+                    amount,
+                    description,
+                    user=request.user
+                )
+                
+                # Refresh account to get updated balance
+                bank_account.refresh_from_db()
+                
+                # Log successful deposit
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Successful deposit: User {request.user.id}, Amount ${amount}, Account {bank_account.account_number}")
                 
                 messages.success(
                     request, 
@@ -82,10 +88,34 @@ def deposit_view(request):
                 )
                 return redirect('accounts:dashboard')
                 
+            except (TransactionError, AccountNotActiveError) as e:
+                # Log specific transaction errors
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Deposit transaction error for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, f'Deposit failed: {str(e)}')
+                
+            except ConcurrentTransactionError as e:
+                # Log concurrent transaction conflicts
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Concurrent transaction error during deposit for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, 'Transaction conflict detected. Please try again.')
+                
             except Exception as e:
-                messages.error(request, 'An error occurred while processing your deposit. Please try again.')
-                # Log the error for debugging (in production, use proper logging)
-                print(f"Deposit error: {e}")
+                # Log unexpected errors
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Unexpected deposit error for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, 'An unexpected error occurred. Please try again or contact support.')
+        else:
+            # Log form validation errors
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Deposit form validation failed for user {request.user.id}: {form.errors}")
     else:
         form = DepositForm()
     
@@ -122,26 +152,27 @@ def withdrawal_view(request):
         return redirect('accounts:dashboard')
     
     if request.method == 'POST':
-        form = WithdrawalForm(request.POST, account=bank_account)
+        form = WithdrawalForm(request.POST, account=bank_account, request=request)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             description = form.cleaned_data['description']
             
             try:
-                # Use database transaction to ensure atomicity
-                with transaction.atomic():
-                    # Update account balance
-                    bank_account.balance -= amount
-                    bank_account.save()
-                    
-                    # Create transaction record
-                    Transaction.objects.create(
-                        transaction_type='withdrawal',
-                        amount=amount,
-                        description=description,
-                        sender_account=bank_account,
-                        sender_balance_after=bank_account.balance
-                    )
+                # Use enhanced atomic transaction processing
+                transaction_record = BankingTransactionManager.process_withdrawal(
+                    bank_account.account_number,
+                    amount,
+                    description,
+                    user=request.user
+                )
+                
+                # Refresh account to get updated balance
+                bank_account.refresh_from_db()
+                
+                # Log successful withdrawal
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Successful withdrawal: User {request.user.id}, Amount ${amount}, Account {bank_account.account_number}")
                 
                 messages.success(
                     request, 
@@ -149,10 +180,42 @@ def withdrawal_view(request):
                 )
                 return redirect('accounts:dashboard')
                 
+            except InsufficientFundsError as e:
+                # Log insufficient funds
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Insufficient funds for withdrawal - User {request.user.id}: {str(e)}")
+                
+                messages.error(request, str(e))
+                
+            except (TransactionError, AccountNotActiveError) as e:
+                # Log specific transaction errors
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Withdrawal transaction error for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, f'Withdrawal failed: {str(e)}')
+                
+            except ConcurrentTransactionError as e:
+                # Log concurrent transaction conflicts
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Concurrent transaction error during withdrawal for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, 'Transaction conflict detected. Please try again.')
+                
             except Exception as e:
-                messages.error(request, 'An error occurred while processing your withdrawal. Please try again.')
-                # Log the error for debugging (in production, use proper logging)
-                print(f"Withdrawal error: {e}")
+                # Log unexpected errors
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Unexpected withdrawal error for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, 'An unexpected error occurred. Please try again or contact support.')
+        else:
+            # Log form validation errors
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Withdrawal form validation failed for user {request.user.id}: {form.errors}")
     else:
         form = WithdrawalForm(account=bank_account)
     
@@ -189,33 +252,31 @@ def transfer_view(request):
         return redirect('accounts:dashboard')
     
     if request.method == 'POST':
-        form = TransferForm(request.POST, sender_account=sender_account)
+        form = TransferForm(request.POST, sender_account=sender_account, request=request)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             description = form.cleaned_data['description']
             recipient_account = form.get_recipient_account()
             
             try:
-                # Use database transaction to ensure atomicity
-                with transaction.atomic():
-                    # Update sender account balance
-                    sender_account.balance -= amount
-                    sender_account.save()
-                    
-                    # Update recipient account balance
-                    recipient_account.balance += amount
-                    recipient_account.save()
-                    
-                    # Create transaction record
-                    Transaction.objects.create(
-                        transaction_type='transfer',
-                        amount=amount,
-                        description=description,
-                        sender_account=sender_account,
-                        receiver_account=recipient_account,
-                        sender_balance_after=sender_account.balance,
-                        receiver_balance_after=recipient_account.balance
-                    )
+                # Use enhanced atomic transaction processing
+                transaction_record = BankingTransactionManager.process_transfer(
+                    sender_account.account_number,
+                    recipient_account.account_number,
+                    amount,
+                    description,
+                    user=request.user
+                )
+                
+                # Refresh accounts to get updated balances
+                sender_account.refresh_from_db()
+                recipient_account.refresh_from_db()
+                
+                # Log successful transfer
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Successful transfer: User {request.user.id}, Amount ${amount}, "
+                           f"From {sender_account.account_number} to {recipient_account.account_number}")
                 
                 messages.success(
                     request, 
@@ -224,10 +285,42 @@ def transfer_view(request):
                 )
                 return redirect('accounts:dashboard')
                 
+            except InsufficientFundsError as e:
+                # Log insufficient funds
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Insufficient funds for transfer - User {request.user.id}: {str(e)}")
+                
+                messages.error(request, str(e))
+                
+            except (TransactionError, AccountNotActiveError) as e:
+                # Log specific transaction errors
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Transfer transaction error for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, f'Transfer failed: {str(e)}')
+                
+            except ConcurrentTransactionError as e:
+                # Log concurrent transaction conflicts
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Concurrent transaction error during transfer for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, 'Transaction conflict detected. Please try again.')
+                
             except Exception as e:
-                messages.error(request, 'An error occurred while processing your transfer. Please try again.')
-                # Log the error for debugging (in production, use proper logging)
-                print(f"Transfer error: {e}")
+                # Log unexpected errors
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Unexpected transfer error for user {request.user.id}: {str(e)}")
+                
+                messages.error(request, 'An unexpected error occurred. Please try again or contact support.')
+        else:
+            # Log form validation errors
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Transfer form validation failed for user {request.user.id}: {form.errors}")
     else:
         form = TransferForm(sender_account=sender_account)
     

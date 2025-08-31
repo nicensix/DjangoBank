@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Banking Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .stat-card.success {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .stat-card.info {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .admin-nav {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .activity-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .high-priority {
+        border-left-color: #dc3545 !important;
+    }
+    
+    .medium-priority {
+        border-left-color: #ffc107 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+            <div class="text-muted">
+                <i class="fas fa-clock"></i> Last updated: {{ "now"|date:"M d, Y H:i" }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Navigation -->
+<div class="admin-nav">
+    <div class="row">
+        <div class="col-md-4">
+            <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-primary btn-lg w-100 mb-2">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'admin_panel:user_management' %}" class="btn btn-outline-primary btn-lg w-100 mb-2">
+                <i class="fas fa-users"></i> User Management
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'admin_panel:transaction_monitoring' %}" class="btn btn-outline-primary btn-lg w-100 mb-2">
+                <i class="fas fa-chart-line"></i> Transaction Monitor
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row">
+    <!-- User Statistics -->
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ total_users }}</h3>
+                    <p class="mb-0">Total Users</p>
+                </div>
+                <i class="fas fa-users fa-2x"></i>
+            </div>
+            <small>{{ active_users }} active</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ total_accounts }}</h3>
+                    <p class="mb-0">Bank Accounts</p>
+                </div>
+                <i class="fas fa-university fa-2x"></i>
+            </div>
+            <small>{{ active_accounts }} active, {{ pending_accounts }} pending</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card info">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>${{ total_balance|floatformat:2 }}</h3>
+                    <p class="mb-0">Total Balance</p>
+                </div>
+                <i class="fas fa-dollar-sign fa-2x"></i>
+            </div>
+            <small>System-wide balance</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ total_transactions }}</h3>
+                    <p class="mb-0">Transactions</p>
+                </div>
+                <i class="fas fa-exchange-alt fa-2x"></i>
+            </div>
+            <small>{{ transactions_today }} today</small>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Overview -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="activity-card">
+            <h5><i class="fas fa-chart-bar"></i> Recent Activity</h5>
+            <div class="row text-center">
+                <div class="col-6">
+                    <h6>This Week</h6>
+                    <p class="text-primary">{{ new_users_this_week }} new users</p>
+                    <p class="text-success">{{ transactions_this_week }} transactions</p>
+                </div>
+                <div class="col-6">
+                    <h6>This Month</h6>
+                    <p class="text-primary">{{ new_users_this_month }} new users</p>
+                    <p class="text-success">{{ transactions_this_month }} transactions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="activity-card">
+            <h5><i class="fas fa-money-bill-wave"></i> Transaction Volume</h5>
+            <div class="row text-center">
+                <div class="col-6">
+                    <h6>Today</h6>
+                    <p class="text-success">${{ transaction_volume_today|floatformat:2 }}</p>
+                </div>
+                <div class="col-6">
+                    <h6>This Week</h6>
+                    <p class="text-success">${{ transaction_volume_week|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="activity-card">
+            <h5><i class="fas fa-exclamation-triangle"></i> Account Status</h5>
+            <div class="row text-center">
+                <div class="col-6">
+                    <p class="text-warning">{{ frozen_accounts }} frozen</p>
+                    <p class="text-danger">{{ closed_accounts }} closed</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-info">{{ pending_accounts }} pending</p>
+                    <p class="text-success">{{ active_accounts }} active</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Actions -->
+{% if pending_approval_accounts %}
+<div class="row">
+    <div class="col-12">
+        <div class="activity-card high-priority">
+            <h5><i class="fas fa-clock"></i> Accounts Pending Approval ({{ pending_approval_accounts|length }})</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Account Number</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in pending_approval_accounts %}
+                        <tr>
+                            <td>{{ account.account_number }}</td>
+                            <td>{{ account.user.get_full_name|default:account.user.username }}</td>
+                            <td>{{ account.get_account_type_display }}</td>
+                            <td>{{ account.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'admin_panel:approve_account' account.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                </form>
+                                <a href="{% url 'admin_panel:account_management' %}" class="btn btn-sm btn-info">Manage</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- High Value Transactions -->
+{% if high_value_transactions %}
+<div class="row">
+    <div class="col-12">
+        <div class="activity-card medium-priority">
+            <h5><i class="fas fa-dollar-sign"></i> High Value Transactions ({{ high_value_transactions|length }})</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>From/To</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in high_value_transactions %}
+                        <tr>
+                            <td>{{ transaction.reference_number }}</td>
+                            <td>{{ transaction.get_transaction_type_display }}</td>
+                            <td class="text-success">${{ transaction.amount|floatformat:2 }}</td>
+                            <td>
+                                {% if transaction.transaction_type == 'transfer' %}
+                                    {{ transaction.sender_account.account_number }} → {{ transaction.receiver_account.account_number }}
+                                {% elif transaction.transaction_type == 'deposit' %}
+                                    → {{ transaction.receiver_account.account_number }}
+                                {% else %}
+                                    {{ transaction.sender_account.account_number }} →
+                                {% endif %}
+                            </td>
+                            <td>{{ transaction.timestamp|date:"M d, H:i" }}</td>
+                            <td>
+                                <a href="{% url 'admin_panel:transaction_detail' transaction.id %}" class="btn btn-sm btn-info">Review</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Activities -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="activity-card">
+            <h5><i class="fas fa-history"></i> Recent Admin Actions</h5>
+            {% if recent_admin_actions %}
+                <div class="list-group list-group-flush">
+                    {% for action in recent_admin_actions %}
+                    <div class="list-group-item border-0 px-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ action.get_action_type_display }}</strong><br>
+                                <small class="text-muted">{{ action.description }}</small><br>
+                                <small class="text-info">by {{ action.admin_user.username }}</small>
+                            </div>
+                            <small class="text-muted">{{ action.timestamp|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No recent admin actions</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="activity-card">
+            <h5><i class="fas fa-exchange-alt"></i> Recent Transactions</h5>
+            {% if recent_transactions %}
+                <div class="list-group list-group-flush">
+                    {% for transaction in recent_transactions %}
+                    <div class="list-group-item border-0 px-0">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${{ transaction.amount|floatformat:2 }}</strong> 
+                                <span class="badge bg-primary">{{ transaction.get_transaction_type_display }}</span><br>
+                                <small class="text-muted">{{ transaction.reference_number }}</small>
+                            </div>
+                            <small class="text-muted">{{ transaction.timestamp|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No recent transactions</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- New Users -->
+{% if recent_users %}
+<div class="row">
+    <div class="col-12">
+        <div class="activity-card">
+            <h5><i class="fas fa-user-plus"></i> New Users This Week</h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.get_full_name|default:"-" }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.date_joined|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

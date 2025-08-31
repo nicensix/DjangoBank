@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Management - Banking Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .management-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .filter-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .user-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #28a745;
+    }
+    
+    .user-card.inactive {
+        border-left-color: #dc3545;
+    }
+    
+    .user-card.staff {
+        border-left-color: #ffc107;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .user-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .user-details {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .user-actions {
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="management-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="fas fa-users"></i> User Management</h1>
+            <p class="mb-0">Manage user accounts and permissions</p>
+        </div>
+        <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h4>{{ total_users }}</h4>
+            <p class="mb-0 text-muted">Total Users</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h4 class="text-success">{{ active_users }}</h4>
+            <p class="mb-0 text-muted">Active Users</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h4 class="text-danger">{{ inactive_users }}</h4>
+            <p class="mb-0 text-muted">Inactive Users</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h4 class="text-warning">{{ staff_users }}</h4>
+            <p class="mb-0 text-muted">Staff Users</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-card">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <label for="search" class="form-label">Search Users</label>
+            <input type="text" class="form-control" id="search" name="search" 
+                   value="{{ search_query }}" placeholder="Username, name, or email">
+        </div>
+        <div class="col-md-3">
+            <label for="status" class="form-label">Status Filter</label>
+            <select class="form-select" id="status" name="status">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Users</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Only</option>
+                <option value="staff" {% if status_filter == 'staff' %}selected{% endif %}>Staff Only</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-search"></i> Filter
+            </button>
+            <a href="{% url 'admin_panel:user_management' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Users List -->
+<div class="row">
+    <div class="col-12">
+        {% if users %}
+            {% for user in users %}
+            <div class="user-card {% if not user.is_active %}inactive{% elif user.is_staff %}staff{% endif %}">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>
+                                    {{ user.get_full_name|default:user.username }}
+                                    {% if user.is_superuser %}
+                                        <span class="badge bg-danger">Superuser</span>
+                                    {% elif user.is_staff %}
+                                        <span class="badge bg-warning">Staff</span>
+                                    {% endif %}
+                                    {% if not user.is_active %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </h5>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-user"></i> {{ user.username }} | 
+                                    <i class="fas fa-envelope"></i> {{ user.email }}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-calendar"></i> Joined: {{ user.date_joined|date:"M d, Y" }}
+                                    {% if user.last_login %}
+                                        | Last login: {{ user.last_login|date:"M d, Y H:i" }}
+                                    {% else %}
+                                        | Never logged in
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Bank Accounts ({{ user.bank_accounts.count }})</h6>
+                                {% if user.bank_accounts.exists %}
+                                    {% for account in user.bank_accounts.all %}
+                                        <span class="badge bg-{% if account.status == 'active' %}success{% elif account.status == 'pending' %}warning{% elif account.status == 'frozen' %}info{% else %}secondary{% endif %} me-1">
+                                            {{ account.account_number }} ({{ account.get_status_display }})
+                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No accounts</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <div class="action-buttons">
+                            {% if not user.is_superuser %}
+                                <button type="button" class="btn btn-sm {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}" 
+                                        data-bs-toggle="modal" data-bs-target="#toggleStatusModal{{ user.id }}">
+                                    <i class="fas fa-{% if user.is_active %}pause{% else %}play{% endif %}"></i>
+                                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            {% endif %}
+                            <a href="{% url 'admin_panel:account_management' %}?search={{ user.username }}" 
+                               class="btn btn-sm btn-info">
+                                <i class="fas fa-university"></i> Accounts
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toggle Status Modal -->
+            {% if not user.is_superuser %}
+            <div class="modal fade" id="toggleStatusModal{{ user.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                {% if user.is_active %}Deactivate{% else %}Activate{% endif %} User
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="post" action="{% url 'admin_panel:toggle_user_status' user.id %}">
+                            <div class="modal-body">
+                                {% csrf_token %}
+                                <p>Are you sure you want to {% if user.is_active %}deactivate{% else %}activate{% endif %} 
+                                   user <strong>{{ user.username }}</strong>?</p>
+                                
+                                {% if user.is_active %}
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Deactivating this user will prevent them from logging in and accessing their accounts.
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="mb-3">
+                                    <label for="reason{{ user.id }}" class="form-label">Reason (optional)</label>
+                                    <textarea class="form-control" id="reason{{ user.id }}" name="reason" 
+                                              rows="3" placeholder="Enter reason for this action..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %} User
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No users found</h4>
+                <p class="text-muted">Try adjusting your search criteria or filters.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="{% url 'admin_panel:account_management' %}" class="btn btn-outline-primary">
+            <i class="fas fa-university"></i> Account Management
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -18,9 +18,7 @@ from .models import BankAccount
 def register_view(request):
     """
     User registration view with automatic bank account generation.
-    
-    Handles user registration form submission and creates a bank account
-    automatically upon successful registration.
+    Enhanced with comprehensive security validation and logging.
     """
     if request.user.is_authenticated:
         return redirect('accounts:dashboard')
@@ -29,7 +27,18 @@ def register_view(request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             try:
+                # Log registration attempt
+                from core.security import log_authentication_attempt
+                
                 user = form.save()
+                
+                # Log successful registration
+                log_authentication_attempt(
+                    request, 
+                    user.username, 
+                    success=True
+                )
+                
                 messages.success(
                     request, 
                     f'Registration successful! Your account has been created and is pending approval. '
@@ -37,12 +46,28 @@ def register_view(request):
                 )
                 # Redirect to login page after successful registration
                 return redirect('accounts:login')
+                
             except Exception as e:
+                # Log registration error
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Registration error for user {form.cleaned_data.get('username', 'unknown')}: {str(e)}")
+                
                 messages.error(
                     request,
                     'An error occurred during registration. Please try again.'
                 )
         else:
+            # Log failed registration attempt
+            from core.security import log_authentication_attempt
+            username = request.POST.get('username', 'unknown')
+            log_authentication_attempt(
+                request, 
+                username, 
+                success=False, 
+                failure_reason='form_validation_failed'
+            )
+            
             messages.error(
                 request,
                 'Please correct the errors below.'
@@ -60,30 +85,72 @@ def register_view(request):
 @never_cache
 def login_view(request):
     """
-    User login view with session management.
-    
-    Handles user authentication and redirects to dashboard upon success.
+    User login view with enhanced security and session management.
     """
     if request.user.is_authenticated:
         return redirect('accounts:dashboard')
     
     if request.method == 'POST':
-        form = UserLoginForm(request.POST)
+        form = UserLoginForm(request.POST, request=request)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             
             if user is not None:
+                # Additional security checks before login
+                from core.security import check_suspicious_activity, log_authentication_attempt
+                
+                # Check for suspicious activity
+                suspicious_indicators = check_suspicious_activity(request, user)
+                if any(suspicious_indicators.values()):
+                    # Log suspicious login
+                    log_authentication_attempt(
+                        request, 
+                        username, 
+                        success=False, 
+                        failure_reason='suspicious_activity_detected'
+                    )
+                    messages.error(request, 'Login blocked due to suspicious activity. Please contact support.')
+                    return render(request, 'accounts/login.html', {
+                        'form': UserLoginForm(),
+                        'title': 'Login - Banking Platform'
+                    })
+                
+                # Successful login
                 login(request, user)
+                
+                # Log successful login
+                log_authentication_attempt(request, username, success=True)
+                
+                # Regenerate session key for security
+                request.session.cycle_key()
+                
                 messages.success(request, f'Welcome back, {user.first_name}!')
                 
                 # Redirect to next page if specified, otherwise to dashboard
                 next_page = request.GET.get('next', 'accounts:dashboard')
                 return redirect(next_page)
             else:
+                # Log failed login
+                from core.security import log_authentication_attempt
+                log_authentication_attempt(
+                    request, 
+                    username, 
+                    success=False, 
+                    failure_reason='invalid_credentials'
+                )
                 messages.error(request, 'Invalid username or password.')
         else:
+            # Log form validation failure
+            username = request.POST.get('username', 'unknown')
+            from core.security import log_authentication_attempt
+            log_authentication_attempt(
+                request, 
+                username, 
+                success=False, 
+                failure_reason='form_validation_failed'
+            )
             messages.error(request, 'Please correct the errors below.')
     else:
         form = UserLoginForm()

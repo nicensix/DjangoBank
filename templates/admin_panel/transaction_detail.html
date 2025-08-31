@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transaction Detail - Banking Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .detail-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .detail-card.warning {
+        border-left-color: #ffc107;
+    }
+    
+    .detail-card.danger {
+        border-left-color: #dc3545;
+    }
+    
+    .amount-display {
+        font-size: 2em;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    
+    .account-info {
+        background: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .timeline-item {
+        border-left: 2px solid #dee2e6;
+        padding-left: 15px;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 5px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #007bff;
+    }
+    
+    .timeline-item.warning::before {
+        background: #ffc107;
+    }
+    
+    .timeline-item.danger::before {
+        background: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="fas fa-receipt"></i> Transaction Detail</h1>
+            <p class="mb-0">{{ transaction.reference_number }}</p>
+        </div>
+        <a href="{% url 'admin_panel:transaction_monitoring' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> Back to Monitoring
+        </a>
+    </div>
+</div>
+
+<!-- Transaction Overview -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="detail-card {% if transaction.amount >= 10000 %}warning{% endif %}">
+            <h4>Transaction Information</h4>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Basic Details</h6>
+                    <p><strong>Reference Number:</strong> {{ transaction.reference_number }}</p>
+                    <p><strong>Type:</strong> 
+                        <span class="badge bg-primary">{{ transaction.get_transaction_type_display }}</span>
+                        {% if transaction.amount >= 10000 %}
+                            <span class="badge bg-warning">High Value</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Timestamp:</strong> {{ transaction.timestamp|date:"F d, Y H:i:s" }}</p>
+                    {% if transaction.description %}
+                        <p><strong>Description:</strong> {{ transaction.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h6>Amount</h6>
+                    <div class="amount-display text-{% if transaction.transaction_type == 'deposit' %}success{% elif transaction.transaction_type == 'withdrawal' %}danger{% else %}info{% endif %}">
+                        ${{ transaction.amount|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Information -->
+        <div class="detail-card">
+            <h4>Account Information</h4>
+            
+            {% if transaction.transaction_type == 'transfer' %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="account-info">
+                            <h6><i class="fas fa-arrow-right text-danger"></i> Sender Account</h6>
+                            <p><strong>Account:</strong> {{ transaction.sender_account.account_number }}</p>
+                            <p><strong>User:</strong> {{ transaction.sender_account.user.get_full_name|default:transaction.sender_account.user.username }}</p>
+                            <p><strong>Email:</strong> {{ transaction.sender_account.user.email }}</p>
+                            <p><strong>Type:</strong> {{ transaction.sender_account.get_account_type_display }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-{% if transaction.sender_account.status == 'active' %}success{% elif transaction.sender_account.status == 'frozen' %}warning{% else %}secondary{% endif %}">
+                                    {{ transaction.sender_account.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Balance After:</strong> ${{ transaction.sender_balance_after|floatformat:2|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="account-info">
+                            <h6><i class="fas fa-arrow-left text-success"></i> Receiver Account</h6>
+                            <p><strong>Account:</strong> {{ transaction.receiver_account.account_number }}</p>
+                            <p><strong>User:</strong> {{ transaction.receiver_account.user.get_full_name|default:transaction.receiver_account.user.username }}</p>
+                            <p><strong>Email:</strong> {{ transaction.receiver_account.user.email }}</p>
+                            <p><strong>Type:</strong> {{ transaction.receiver_account.get_account_type_display }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-{% if transaction.receiver_account.status == 'active' %}success{% elif transaction.receiver_account.status == 'frozen' %}warning{% else %}secondary{% endif %}">
+                                    {{ transaction.receiver_account.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Balance After:</strong> ${{ transaction.receiver_balance_after|floatformat:2|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% elif transaction.transaction_type == 'deposit' %}
+                <div class="account-info">
+                    <h6><i class="fas fa-plus-circle text-success"></i> Deposit Account</h6>
+                    <p><strong>Account:</strong> {{ transaction.receiver_account.account_number }}</p>
+                    <p><strong>User:</strong> {{ transaction.receiver_account.user.get_full_name|default:transaction.receiver_account.user.username }}</p>
+                    <p><strong>Email:</strong> {{ transaction.receiver_account.user.email }}</p>
+                    <p><strong>Type:</strong> {{ transaction.receiver_account.get_account_type_display }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-{% if transaction.receiver_account.status == 'active' %}success{% elif transaction.receiver_account.status == 'frozen' %}warning{% else %}secondary{% endif %}">
+                            {{ transaction.receiver_account.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Balance After:</strong> ${{ transaction.receiver_balance_after|floatformat:2|default:"N/A" }}</p>
+                </div>
+            {% else %}
+                <div class="account-info">
+                    <h6><i class="fas fa-minus-circle text-danger"></i> Withdrawal Account</h6>
+                    <p><strong>Account:</strong> {{ transaction.sender_account.account_number }}</p>
+                    <p><strong>User:</strong> {{ transaction.sender_account.user.get_full_name|default:transaction.sender_account.user.username }}</p>
+                    <p><strong>Email:</strong> {{ transaction.sender_account.user.email }}</p>
+                    <p><strong>Type:</strong> {{ transaction.sender_account.get_account_type_display }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-{% if transaction.sender_account.status == 'active' %}success{% elif transaction.sender_account.status == 'frozen' %}warning{% else %}secondary{% endif %}">
+                            {{ transaction.sender_account.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Balance After:</strong> ${{ transaction.sender_balance_after|floatformat:2|default:"N/A" }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Actions -->
+        <div class="detail-card">
+            <h5>Actions</h5>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#flagModal">
+                    <i class="fas fa-flag"></i> Flag as Suspicious
+                </button>
+                
+                {% if transaction.sender_account and transaction.sender_account.status == 'active' %}
+                    <a href="{% url 'admin_panel:account_management' %}?search={{ transaction.sender_account.account_number }}" 
+                       class="btn btn-info">
+                        <i class="fas fa-university"></i> Manage Sender Account
+                    </a>
+                {% endif %}
+                
+                {% if transaction.receiver_account and transaction.receiver_account.status == 'active' %}
+                    <a href="{% url 'admin_panel:account_management' %}?search={{ transaction.receiver_account.account_number }}" 
+                       class="btn btn-info">
+                        <i class="fas fa-university"></i> Manage Receiver Account
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Risk Assessment -->
+        <div class="detail-card {% if transaction.amount >= 50000 %}danger{% elif transaction.amount >= 10000 %}warning{% endif %}">
+            <h5>Risk Assessment</h5>
+            
+            {% if transaction.amount >= 50000 %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>High Risk:</strong> Very large transaction amount
+                </div>
+            {% elif transaction.amount >= 10000 %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Medium Risk:</strong> Large transaction amount
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Low Risk:</strong> Normal transaction amount
+                </div>
+            {% endif %}
+            
+            <!-- Round number check -->
+            {% if transaction.amount in "1000,2000,5000,10000,20000,50000,100000"|make_list %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Round number transaction (potential structuring)
+                </div>
+            {% endif %}
+            
+            <!-- Time-based checks -->
+            {% if transaction.timestamp.hour < 6 or transaction.timestamp.hour > 22 %}
+                <div class="alert alert-info">
+                    <i class="fas fa-clock"></i>
+                    Off-hours transaction
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Related Activities -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h5>Related Admin Actions</h5>
+            {% if related_actions %}
+                <div class="timeline">
+                    {% for action in related_actions %}
+                    <div class="timeline-item {% if action.action_type == 'account_freeze' %}danger{% elif action.action_type == 'account_approve' %}success{% else %}warning{% endif %}">
+                        <h6>{{ action.get_action_type_display }}</h6>
+                        <p class="mb-1">{{ action.description }}</p>
+                        <small class="text-muted">
+                            by {{ action.admin_user.username }} - {{ action.timestamp|date:"M d, Y H:i" }}
+                        </small>
+                        {% if action.reason %}
+                            <p class="mt-1 mb-0"><small><strong>Reason:</strong> {{ action.reason }}</small></p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No related admin actions found.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h5>Related Transactions</h5>
+            {% if related_transactions %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for related_transaction in related_transactions %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'admin_panel:transaction_detail' related_transaction.id %}">
+                                        {{ related_transaction.reference_number }}
+                                    </a>
+                                </td>
+                                <td>{{ related_transaction.get_transaction_type_display }}</td>
+                                <td>${{ related_transaction.amount|floatformat:2 }}</td>
+                                <td>{{ related_transaction.timestamp|date:"M d, H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No related transactions found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Flag Transaction Modal -->
+<div class="modal fade" id="flagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Flag Transaction as Suspicious</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'admin_panel:flag_transaction' transaction.id %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <p>Flag transaction <strong>{{ transaction.reference_number }}</strong> as suspicious?</p>
+                    
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason (required)</label>
+                        <textarea class="form-control" id="reason" name="reason" 
+                                  rows="4" placeholder="Describe why this transaction is suspicious..." required></textarea>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="freeze_accounts" name="freeze_accounts" value="true">
+                        <label class="form-check-label" for="freeze_accounts">
+                            Also freeze related accounts
+                        </label>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        This action will be logged and may trigger account freezing if selected.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Flag Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'admin_panel:transaction_monitoring' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-chart-line"></i> Transaction Monitoring
+        </a>
+        <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

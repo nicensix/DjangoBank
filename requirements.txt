@@ -1,6 +1,35 @@
+# Core Django framework
 Django>=5.0,<6.0
+
+# Database drivers
 psycopg2-binary>=2.9.0
+
+# Configuration management
 dj-database-url>=2.0.0
 python-decouple>=3.8
-Pillow>=10.0.0r
-eportlab>=4.0.0
+
+# File handling
+Pillow>=10.0.0
+
+# PDF generation
+reportlab>=4.0.0
+
+# Production server
+gunicorn>=21.2.0
+
+# Security and performance
+django-cors-headers>=4.3.0
+whitenoise>=6.6.0
+
+# Monitoring and logging
+sentry-sdk>=1.38.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Redis cache backend
+django-redis>=5.4.0
+redis>=5.0.0
+
+# Additional production dependencies
+django-extensions>=3.2.0
