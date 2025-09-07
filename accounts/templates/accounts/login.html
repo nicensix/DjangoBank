@@ -1,95 +1,203 @@
-{% extends 'accounts/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Login - Banking Platform{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0 text-center">Welcome Back</h4>
-            </div>
-            <div class="card-body">
-                <p class="text-muted text-center mb-4">
-                    Sign in to access your banking account.
-                </p>
-                
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Username -->
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100 py-5">
+        <div class="col-11 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+            <!-- Main Login Card -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-4 border-0">
                     <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">
-                            Username <span class="text-danger">*</span>
-                        </label>
-                        {{ form.username }}
-                        {% if form.username.help_text %}
-                            <div class="form-text">{{ form.username.help_text }}</div>
-                        {% endif %}
-                        {% if form.username.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.username.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                        <i class="fas fa-university fa-3x opacity-75"></i>
                     </div>
-                    
-                    <!-- Password -->
-                    <div class="mb-4">
-                        <label for="{{ form.password.id_for_label }}" class="form-label">
-                            Password <span class="text-danger">*</span>
-                        </label>
-                        {{ form.password }}
-                        {% if form.password.help_text %}
-                            <div class="form-text">{{ form.password.help_text }}</div>
-                        {% endif %}
-                        {% if form.password.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.password.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
+                    <h3 class="mb-0 fw-bold">Welcome Back</h3>
+                    <p class="mb-0 opacity-90">Sign in to your secure banking account</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <!-- Security Badge -->
+                    <div class="text-center mb-4">
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-lock text-primary fa-lg"></i>
                             </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Non-field errors -->
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
                         </div>
-                    {% endif %}
-                    
-                    <!-- Submit Button -->
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            Sign In
-                        </button>
+                        <p class="text-muted small mb-0">
+                            Your connection is secured with 256-bit SSL encryption
+                        </p>
                     </div>
-                </form>
-                
-                <hr class="my-4">
-                
-                <div class="text-center">
-                    <p class="mb-0">
-                        Don't have an account? 
-                        <a href="{% url 'accounts:register' %}" class="text-decoration-none">Create one here</a>
-                    </p>
+                    
+                    <!-- Login Form -->
+                    <form method="post" novalidate class="needs-validation" id="loginForm">
+                        {% csrf_token %}
+                        
+                        <!-- Username Field with Floating Label -->
+                        <div class="form-floating mb-3">
+                            <input 
+                                type="text" 
+                                class="form-control{% if form.username.errors %} is-invalid{% endif %}" 
+                                id="{{ form.username.id_for_label }}" 
+                                name="{{ form.username.name }}"
+                                value="{{ form.username.value|default:'' }}"
+                                placeholder="Username"
+                                autocomplete="username"
+                                required
+                            >
+                            <label for="{{ form.username.id_for_label }}">
+                                <i class="fas fa-user me-2"></i>Username
+                            </label>
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Password Field with Floating Label -->
+                        <div class="form-floating mb-4">
+                            <input 
+                                type="password" 
+                                class="form-control{% if form.password.errors %} is-invalid{% endif %}" 
+                                id="{{ form.password.id_for_label }}" 
+                                name="{{ form.password.name }}"
+                                placeholder="Password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <label for="{{ form.password.id_for_label }}">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Non-field errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg py-3" id="loginBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-sign-in-alt me-2"></i>
+                                    Sign In Securely
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Signing In...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Divider -->
+                    <div class="text-center">
+                        <div class="d-flex align-items-center my-4">
+                            <hr class="flex-grow-1">
+                            <span class="px-3 text-muted small">OR</span>
+                            <hr class="flex-grow-1">
+                        </div>
+                        
+                        <!-- Register Link -->
+                        <p class="mb-0">
+                            Don't have an account? 
+                            <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-semibold">
+                                Create one here
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Security Notice -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h6 class="card-title">🔒 Security Notice</h6>
-                <p class="mb-0 small text-muted">
-                    For your security, please ensure you're on the correct website and never share your login credentials with anyone.
-                </p>
+            
+            <!-- Security Features -->
+            <div class="row mt-4 g-3">
+                <div class="col-4">
+                    <div class="card border-0 bg-light text-center py-3 h-100">
+                        <div class="card-body p-2 d-flex flex-column justify-content-center">
+                            <i class="fas fa-shield-alt text-success mb-2 fs-5"></i>
+                            <div class="small fw-semibold">Secure</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card border-0 bg-light text-center py-3 h-100">
+                        <div class="card-body p-2 d-flex flex-column justify-content-center">
+                            <i class="fas fa-lock text-primary mb-2 fs-5"></i>
+                            <div class="small fw-semibold">Encrypted</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card border-0 bg-light text-center py-3 h-100">
+                        <div class="card-body p-2 d-flex flex-column justify-content-center">
+                            <i class="fas fa-user-check text-info mb-2 fs-5"></i>
+                            <div class="small fw-semibold">Verified</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('loginBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 3 seconds as fallback
+        setTimeout(function() {
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+    
+    // Enhanced form validation
+    const inputs = form.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim() !== '') {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

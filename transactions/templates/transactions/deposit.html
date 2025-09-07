@@ -1,110 +1,186 @@
-{% extends 'accounts/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}{{ title }} - Banking Platform{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <!-- Page Header -->
-        <div class="card bg-success text-white mb-4">
-            <div class="card-body">
-                <h2 class="card-title mb-1">💰 {{ title }}</h2>
-                <p class="card-text mb-0">Add money to your account safely and securely.</p>
-            </div>
-        </div>
-
-        <!-- Account Information -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Account Information</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="text-muted">Account Number</h6>
-                        <p class="h6 font-monospace">{{ bank_account.account_number }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-muted">Current Balance</h6>
-                        <p class="h5 text-success">${{ bank_account.balance|floatformat:2 }}</p>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <!-- Page Header -->
+            <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, var(--bs-success) 0%, #198754 100%);">
+                <div class="card-body text-white py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-plus-circle fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h1 class="h2 mb-1 fw-bold">{{ title }}</h1>
+                                    <p class="mb-0 opacity-90">Add money to your account safely and securely.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end d-none d-md-block">
+                            <i class="fas fa-shield-alt fa-2x opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Deposit Form -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Deposit Details</h5>
-            </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Amount Field -->
-                    <div class="mb-3">
-                        <label for="{{ form.amount.id_for_label }}" class="form-label">
-                            <strong>Deposit Amount</strong>
-                        </label>
-                        {{ form.amount }}
-                        {% if form.amount.help_text %}
-                            <div class="form-text">{{ form.amount.help_text }}</div>
-                        {% endif %}
-                        {% if form.amount.errors %}
-                            {% for error in form.amount.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
+            <!-- Account Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        <h5 class="mb-0 fw-semibold">Account Information</h5>
                     </div>
-
-                    <!-- Description Field -->
-                    <div class="mb-3">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">
-                            Description
-                        </label>
-                        {{ form.description }}
-                        {% if form.description.help_text %}
-                            <div class="form-text">{{ form.description.help_text }}</div>
-                        {% endif %}
-                        {% if form.description.errors %}
-                            {% for error in form.description.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <!-- Form Errors -->
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
+                </div>
+                <div class="card-body pt-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-hashtag text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small mb-1">Account Number</div>
+                                    <div class="fw-semibold font-monospace">{{ bank_account.account_number }}</div>
+                                </div>
+                            </div>
                         </div>
-                    {% endif %}
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success">
-                            💰 Deposit Money
-                        </button>
-                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-secondary">
-                            Cancel
-                        </a>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-success bg-opacity-10 rounded-3">
+                                <div class="bg-success bg-opacity-20 rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-dollar-sign text-success"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small mb-1">Current Balance</div>
+                                    <div class="h5 text-success mb-0 fw-bold">${{ bank_account.balance|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Security Notice -->
-        <div class="card mt-4 border-info">
-            <div class="card-body">
-                <h6 class="card-title text-info">🔒 Security Notice</h6>
-                <ul class="card-text mb-0 small">
-                    <li>All transactions are encrypted and secure</li>
-                    <li>Maximum deposit limit: $100,000 per transaction</li>
-                    <li>Deposits are processed immediately</li>
-                    <li>Transaction records are maintained for your security</li>
-                </ul>
+            <!-- Deposit Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-edit text-success me-2"></i>
+                        Deposit Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate id="depositForm">
+                        {% csrf_token %}
+                        
+                        <!-- Amount Field with Floating Label -->
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <input type="number" 
+                                       class="form-control form-control-lg{% if form.amount.errors %} is-invalid{% endif %}" 
+                                       id="{{ form.amount.id_for_label }}" 
+                                       name="{{ form.amount.name }}"
+                                       placeholder="0.00"
+                                       step="0.01"
+                                       min="0.01"
+                                       max="100000"
+                                       value="{{ form.amount.value|default:'' }}"
+                                       autocomplete="off"
+                                       required>
+                                <label for="{{ form.amount.id_for_label }}" class="fw-semibold">
+                                    <i class="fas fa-dollar-sign me-1"></i>Deposit Amount
+                                </label>
+                                {% if form.amount.errors %}
+                                    {% for error in form.amount.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Enter the amount you want to deposit (minimum $0.01, maximum $100,000).
+                            </div>
+                        </div>
+
+                        <!-- Description Field with Floating Label -->
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <input type="text" 
+                                       class="form-control{% if form.description.errors %} is-invalid{% endif %}" 
+                                       id="{{ form.description.id_for_label }}" 
+                                       name="{{ form.description.name }}"
+                                       placeholder="Optional description"
+                                       maxlength="255"
+                                       value="{{ form.description.value|default:'' }}">
+                                <label for="{{ form.description.id_for_label }}">
+                                    <i class="fas fa-comment me-1"></i>Description (Optional)
+                                </label>
+                                {% if form.description.errors %}
+                                    {% for error in form.description.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Add a description like "Salary", "Gift", or "Savings" (optional).
+                            </div>
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <div>
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
+                            <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-lg px-4 me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg px-4" id="submitBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    Deposit Money
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="card border-0 bg-info bg-opacity-10 mt-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <div class="bg-info bg-opacity-20 rounded-circle p-2 me-3 flex-shrink-0">
+                            <i class="fas fa-shield-alt text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-info fw-semibold mb-2">Security & Information</h6>
+                            <ul class="list-unstyled mb-0 small text-muted">
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>All transactions are encrypted and secure</li>
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Maximum deposit limit: $100,000 per transaction</li>
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Deposits are processed immediately</li>
+                                <li class="mb-0"><i class="fas fa-check text-success me-2"></i>Transaction records are maintained for your security</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -113,41 +189,92 @@
 
 {% block extra_js %}
 <script>
-    // Add some client-side validation and formatting
-    document.addEventListener('DOMContentLoaded', function() {
-        const amountField = document.getElementById('{{ form.amount.id_for_label }}');
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('depositForm');
+    const amountField = document.getElementById('{{ form.amount.id_for_label }}');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    // Enhanced amount field validation and formatting
+    if (amountField) {
+        // Real-time validation and formatting
+        amountField.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Remove any non-digit or decimal characters
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit to 2 decimal places
+            if (parts[1] && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+            
+            e.target.value = value;
+            
+            // Real-time validation feedback
+            const amount = parseFloat(value);
+            if (value && (isNaN(amount) || amount < 0.01 || amount > 100000)) {
+                e.target.classList.add('is-invalid');
+                e.target.classList.remove('is-valid');
+            } else if (value && amount >= 0.01) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-invalid', 'is-valid');
+            }
+        });
         
-        if (amountField) {
-            // Format amount as user types
-            amountField.addEventListener('input', function(e) {
-                let value = e.target.value;
-                
-                // Remove any non-digit or decimal characters
-                value = value.replace(/[^0-9.]/g, '');
-                
-                // Ensure only one decimal point
-                const parts = value.split('.');
-                if (parts.length > 2) {
-                    value = parts[0] + '.' + parts.slice(1).join('');
-                }
-                
-                // Limit to 2 decimal places
-                if (parts[1] && parts[1].length > 2) {
-                    value = parts[0] + '.' + parts[1].substring(0, 2);
-                }
-                
-                e.target.value = value;
-            });
+        // Format on blur
+        amountField.addEventListener('blur', function(e) {
+            const value = parseFloat(e.target.value);
+            if (!isNaN(value) && value > 0) {
+                e.target.value = value.toFixed(2);
+            }
+        });
+        
+        // Focus enhancement
+        amountField.addEventListener('focus', function(e) {
+            e.target.select();
+        });
+    }
+    
+    // Form submission with loading state
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
             
-            // Add focus styling
-            amountField.addEventListener('focus', function(e) {
-                e.target.parentElement.classList.add('focused');
-            });
-            
-            amountField.addEventListener('blur', function(e) {
-                e.target.parentElement.classList.remove('focused');
-            });
-        }
-    });
+            // Basic client-side validation
+            const amount = parseFloat(amountField.value);
+            if (isNaN(amount) || amount < 0.01 || amount > 100000) {
+                e.preventDefault();
+                
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.classList.remove('d-none');
+                btnLoading.classList.add('d-none');
+                
+                // Show validation error
+                amountField.classList.add('is-invalid');
+                amountField.focus();
+                return false;
+            }
+        });
+    }
+    
+    // Auto-focus amount field
+    if (amountField) {
+        amountField.focus();
+    }
+});
 </script>
 {% endblock %}

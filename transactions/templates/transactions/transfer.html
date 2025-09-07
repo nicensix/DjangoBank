@@ -1,139 +1,260 @@
-{% extends 'accounts/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}{{ title }} - Banking Platform{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <!-- Page Header -->
-        <div class="card bg-primary text-white mb-4">
-            <div class="card-body">
-                <h2 class="card-title mb-1">🔄 {{ title }}</h2>
-                <p class="card-text mb-0">Transfer money to another account safely and securely.</p>
-            </div>
-        </div>
-
-        <!-- Account Information -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Your Account Information</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="text-muted">Your Account Number</h6>
-                        <p class="h6 font-monospace">{{ sender_account.account_number }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-muted">Available Balance</h6>
-                        <p class="h5 text-success">${{ sender_account.balance|floatformat:2 }}</p>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <!-- Page Header -->
+            <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, var(--bs-primary) 0%, #0d6efd 100%);">
+                <div class="card-body text-white py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-exchange-alt fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h1 class="h2 mb-1 fw-bold">{{ title }}</h1>
+                                    <p class="mb-0 opacity-90">Transfer money to another account safely and securely.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end d-none d-md-block">
+                            <i class="fas fa-shield-alt fa-2x opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Transfer Form -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Transfer Details</h5>
+            <!-- Account Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-circle text-primary me-2"></i>
+                        <h5 class="mb-0 fw-semibold">Your Account Information</h5>
+                    </div>
+                </div>
+                <div class="card-body pt-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-hashtag text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small mb-1">Your Account Number</div>
+                                    <div class="fw-semibold font-monospace">{{ sender_account.account_number }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 {% if sender_account.balance > 0 %}bg-success bg-opacity-10{% else %}bg-danger bg-opacity-10{% endif %} rounded-3">
+                                <div class="{% if sender_account.balance > 0 %}bg-success bg-opacity-20{% else %}bg-danger bg-opacity-20{% endif %} rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-dollar-sign {% if sender_account.balance > 0 %}text-success{% else %}text-danger{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small mb-1">Available Balance</div>
+                                    <div class="h5 {% if sender_account.balance > 0 %}text-success{% else %}text-danger{% endif %} mb-0 fw-bold">${{ sender_account.balance|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Recipient Account Number Field -->
-                    <div class="mb-3">
-                        <label for="{{ form.recipient_account_number.id_for_label }}" class="form-label">
-                            <strong>Recipient Account Number</strong>
-                        </label>
-                        {{ form.recipient_account_number }}
-                        {% if form.recipient_account_number.help_text %}
-                            <div class="form-text">{{ form.recipient_account_number.help_text }}</div>
-                        {% endif %}
-                        {% if form.recipient_account_number.errors %}
-                            {% for error in form.recipient_account_number.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
 
-                    <!-- Amount Field -->
-                    <div class="mb-3">
-                        <label for="{{ form.amount.id_for_label }}" class="form-label">
-                            <strong>Transfer Amount</strong>
-                        </label>
-                        {{ form.amount }}
-                        {% if form.amount.help_text %}
-                            <div class="form-text">{{ form.amount.help_text }}</div>
-                        {% endif %}
-                        {% if form.amount.errors %}
-                            {% for error in form.amount.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
+            <!-- Balance Warnings -->
+            {% if sender_account.balance == 0 %}
+                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <div>
+                        <strong>Insufficient Funds:</strong> Your account balance is $0.00. You cannot make any transfers at this time.
                     </div>
-
-                    <!-- Description Field -->
-                    <div class="mb-3">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">
-                            Description
-                        </label>
-                        {{ form.description }}
-                        {% if form.description.help_text %}
-                            <div class="form-text">{{ form.description.help_text }}</div>
-                        {% endif %}
-                        {% if form.description.errors %}
-                            {% for error in form.description.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
+                </div>
+            {% elif sender_account.balance < 10 %}
+                <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <div>
+                        <strong>Low Balance:</strong> Your account balance is low. Please ensure you have sufficient funds for your transfer.
                     </div>
+                </div>
+            {% endif %}
 
-                    <!-- Form Errors -->
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
+            <!-- Transfer Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-edit text-primary me-2"></i>
+                        Transfer Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate id="transferForm">
+                        {% csrf_token %}
+                        
+                        <!-- Recipient Account Number Field with Floating Label -->
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <input type="text" 
+                                       class="form-control form-control-lg{% if form.recipient_account_number.errors %} is-invalid{% endif %}" 
+                                       id="{{ form.recipient_account_number.id_for_label }}" 
+                                       name="{{ form.recipient_account_number.name }}"
+                                       placeholder="123456789012"
+                                       pattern="[0-9]{12}"
+                                       maxlength="12"
+                                       value="{{ form.recipient_account_number.value|default:'' }}"
+                                       autocomplete="off"
+                                       {% if sender_account.balance == 0 %}disabled{% endif %}
+                                       required>
+                                <label for="{{ form.recipient_account_number.id_for_label }}" class="fw-semibold">
+                                    <i class="fas fa-user me-1"></i>Recipient Account Number
+                                </label>
+                                {% if form.recipient_account_number.errors %}
+                                    {% for error in form.recipient_account_number.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Enter the 12-digit account number of the recipient. Double-check for accuracy.
+                            </div>
                         </div>
-                    {% endif %}
 
-                    <!-- Balance Warning -->
-                    {% if sender_account.balance == 0 %}
-                        <div class="alert alert-warning">
-                            <strong>Insufficient Funds:</strong> Your account balance is $0.00. You cannot make any transfers at this time.
+                        <!-- Amount Field with Floating Label -->
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <input type="number" 
+                                       class="form-control form-control-lg{% if form.amount.errors %} is-invalid{% endif %}" 
+                                       id="{{ form.amount.id_for_label }}" 
+                                       name="{{ form.amount.name }}"
+                                       placeholder="0.00"
+                                       step="0.01"
+                                       min="0.01"
+                                       max="50000"
+                                       value="{{ form.amount.value|default:'' }}"
+                                       autocomplete="off"
+                                       {% if sender_account.balance == 0 %}disabled{% endif %}
+                                       required>
+                                <label for="{{ form.amount.id_for_label }}" class="fw-semibold">
+                                    <i class="fas fa-dollar-sign me-1"></i>Transfer Amount
+                                </label>
+                                {% if form.amount.errors %}
+                                    {% for error in form.amount.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Enter the amount you want to transfer (minimum $0.01, maximum $50,000).
+                                <br><small class="text-muted">Available balance: <strong>${{ sender_account.balance|floatformat:2 }}</strong></small>
+                            </div>
                         </div>
-                    {% elif sender_account.balance < 10 %}
-                        <div class="alert alert-info">
-                            <strong>Low Balance:</strong> Your account balance is low. Please ensure you have sufficient funds for your transfer.
-                        </div>
-                    {% endif %}
 
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" {% if sender_account.balance == 0 %}disabled{% endif %}>
-                            🔄 Transfer Money
-                        </button>
-                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-secondary">
-                            Cancel
-                        </a>
-                    </div>
-                </form>
+                        <!-- Description Field with Floating Label -->
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <input type="text" 
+                                       class="form-control{% if form.description.errors %} is-invalid{% endif %}" 
+                                       id="{{ form.description.id_for_label }}" 
+                                       name="{{ form.description.name }}"
+                                       placeholder="Optional description"
+                                       maxlength="255"
+                                       value="{{ form.description.value|default:'' }}"
+                                       {% if sender_account.balance == 0 %}disabled{% endif %}>
+                                <label for="{{ form.description.id_for_label }}">
+                                    <i class="fas fa-comment me-1"></i>Description (Optional)
+                                </label>
+                                {% if form.description.errors %}
+                                    {% for error in form.description.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Add a description like "Payment", "Gift", or "Loan repayment" (optional).
+                            </div>
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <div>
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Transfer Confirmation -->
+                        <div class="card bg-light border-0 mb-4" id="transferSummary" style="display: none;">
+                            <div class="card-body">
+                                <h6 class="text-primary fw-semibold mb-3">
+                                    <i class="fas fa-check-circle me-2"></i>Transfer Summary
+                                </h6>
+                                <div class="row g-3 small">
+                                    <div class="col-md-4">
+                                        <div class="text-muted">From Account</div>
+                                        <div class="fw-semibold font-monospace">{{ sender_account.account_number }}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">To Account</div>
+                                        <div class="fw-semibold font-monospace" id="summaryRecipient">-</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Amount</div>
+                                        <div class="fw-semibold text-primary" id="summaryAmount">$0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
+                            <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-lg px-4 me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4" id="submitBtn" {% if sender_account.balance == 0 %}disabled{% endif %}>
+                                <span class="btn-text">
+                                    <i class="fas fa-exchange-alt me-2"></i>
+                                    Transfer Money
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Security Notice -->
-        <div class="card mt-4 border-primary">
-            <div class="card-body">
-                <h6 class="card-title text-primary">🔒 Transfer Security</h6>
-                <ul class="card-text mb-0 small">
-                    <li>Verify the recipient account number carefully before proceeding</li>
-                    <li>Maximum transfer limit: $50,000 per transaction</li>
-                    <li>Transfers are processed immediately and cannot be reversed</li>
-                    <li>Both accounts must be active to complete the transfer</li>
-                    <li>Transaction records are maintained for both accounts</li>
-                    <li>Contact support immediately if you notice any unauthorized transfers</li>
-                </ul>
+            <!-- Security Notice -->
+            <div class="card border-0 bg-primary bg-opacity-10 mt-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <div class="bg-primary bg-opacity-20 rounded-circle p-2 me-3 flex-shrink-0">
+                            <i class="fas fa-shield-alt text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-primary fw-semibold mb-2">Transfer Security</h6>
+                            <ul class="list-unstyled mb-0 small text-muted">
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Verify the recipient account number carefully before proceeding</li>
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Maximum transfer limit: $50,000 per transaction</li>
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Transfers are processed immediately and cannot be reversed</li>
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Both accounts must be active to complete the transfer</li>
+                                <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Transaction records are maintained for both accounts</li>
+                                <li class="mb-0"><i class="fas fa-check text-success me-2"></i>Contact support immediately if you notice any unauthorized transfers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -262,5 +383,236 @@
             });
         }
     });
+</script>
+{% endblock %}{%
+ block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('transferForm');
+    const accountField = document.getElementById('{{ form.recipient_account_number.id_for_label }}');
+    const amountField = document.getElementById('{{ form.amount.id_for_label }}');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const transferSummary = document.getElementById('transferSummary');
+    const summaryRecipient = document.getElementById('summaryRecipient');
+    const summaryAmount = document.getElementById('summaryAmount');
+    const availableBalance = {{ sender_account.balance }};
+    const ownAccount = '{{ sender_account.account_number }}';
+    
+    // Enhanced account number validation
+    if (accountField && !accountField.disabled) {
+        accountField.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Remove any non-digit characters
+            value = value.replace(/[^0-9]/g, '');
+            
+            // Limit to 12 digits
+            if (value.length > 12) {
+                value = value.substring(0, 12);
+            }
+            
+            e.target.value = value;
+            
+            // Real-time validation feedback
+            if (value.length === 12 && !value.startsWith('0') && value !== ownAccount) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else if (value.length > 0) {
+                e.target.classList.add('is-invalid');
+                e.target.classList.remove('is-valid');
+            } else {
+                e.target.classList.remove('is-invalid', 'is-valid');
+            }
+            
+            updateTransferSummary();
+        });
+        
+        // Enhanced account validation on blur
+        accountField.addEventListener('blur', function(e) {
+            const enteredAccount = e.target.value;
+            
+            // Remove existing warnings
+            const existingWarning = e.target.parentElement.querySelector('.account-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            if (enteredAccount) {
+                if (enteredAccount === ownAccount) {
+                    e.target.classList.add('is-invalid');
+                    
+                    // Add warning message
+                    const warning = document.createElement('div');
+                    warning.className = 'text-danger small mt-1 account-warning';
+                    warning.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Cannot transfer money to your own account';
+                    e.target.parentElement.appendChild(warning);
+                } else if (enteredAccount.length !== 12) {
+                    e.target.classList.add('is-invalid');
+                    
+                    // Add warning message
+                    const warning = document.createElement('div');
+                    warning.className = 'text-danger small mt-1 account-warning';
+                    warning.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Account number must be exactly 12 digits';
+                    e.target.parentElement.appendChild(warning);
+                } else if (enteredAccount.startsWith('0')) {
+                    e.target.classList.add('is-invalid');
+                    
+                    // Add warning message
+                    const warning = document.createElement('div');
+                    warning.className = 'text-danger small mt-1 account-warning';
+                    warning.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Account number cannot start with 0';
+                    e.target.parentElement.appendChild(warning);
+                } else {
+                    e.target.classList.remove('is-invalid');
+                }
+            }
+        });
+        
+        // Focus enhancement
+        accountField.addEventListener('focus', function(e) {
+            e.target.select();
+        });
+    }
+    
+    // Enhanced amount field validation
+    if (amountField && !amountField.disabled) {
+        // Real-time validation and formatting
+        amountField.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Remove any non-digit or decimal characters
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit to 2 decimal places
+            if (parts[1] && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+            
+            e.target.value = value;
+            
+            // Real-time validation feedback
+            const amount = parseFloat(value);
+            if (value && (isNaN(amount) || amount < 0.01 || amount > 50000 || amount > availableBalance)) {
+                e.target.classList.add('is-invalid');
+                e.target.classList.remove('is-valid');
+            } else if (value && amount >= 0.01 && amount <= availableBalance) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-invalid', 'is-valid');
+            }
+            
+            updateTransferSummary();
+        });
+        
+        // Enhanced balance check on blur
+        amountField.addEventListener('blur', function(e) {
+            const amount = parseFloat(e.target.value);
+            
+            // Remove existing warnings
+            const existingWarning = e.target.parentElement.querySelector('.balance-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            if (!isNaN(amount) && amount > 0) {
+                // Format the value
+                e.target.value = amount.toFixed(2);
+                
+                // Check balance and limits
+                if (amount > availableBalance) {
+                    e.target.classList.add('is-invalid');
+                    
+                    // Add warning message
+                    const warning = document.createElement('div');
+                    warning.className = 'text-danger small mt-1 balance-warning';
+                    warning.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>Amount exceeds available balance of $${availableBalance.toFixed(2)}`;
+                    e.target.parentElement.appendChild(warning);
+                } else if (amount > 50000) {
+                    e.target.classList.add('is-invalid');
+                    
+                    // Add warning message
+                    const warning = document.createElement('div');
+                    warning.className = 'text-danger small mt-1 balance-warning';
+                    warning.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>Amount exceeds maximum transfer limit of $50,000`;
+                    e.target.parentElement.appendChild(warning);
+                } else {
+                    e.target.classList.remove('is-invalid');
+                }
+                
+                updateTransferSummary();
+            }
+        });
+        
+        // Focus enhancement
+        amountField.addEventListener('focus', function(e) {
+            e.target.select();
+        });
+    }
+    
+    // Update transfer summary
+    function updateTransferSummary() {
+        const recipientAccount = accountField.value;
+        const amount = parseFloat(amountField.value);
+        
+        if (recipientAccount && recipientAccount.length === 12 && !isNaN(amount) && amount > 0) {
+            summaryRecipient.textContent = recipientAccount;
+            summaryAmount.textContent = `$${amount.toFixed(2)}`;
+            transferSummary.style.display = 'block';
+        } else {
+            transferSummary.style.display = 'none';
+        }
+    }
+    
+    // Form submission with loading state
+    if (form && submitBtn && !submitBtn.disabled) {
+        form.addEventListener('submit', function(e) {
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+            
+            // Basic client-side validation
+            const recipientAccount = accountField.value;
+            const amount = parseFloat(amountField.value);
+            
+            if (!recipientAccount || recipientAccount.length !== 12 || recipientAccount.startsWith('0') || 
+                recipientAccount === ownAccount || isNaN(amount) || amount < 0.01 || 
+                amount > 50000 || amount > availableBalance) {
+                
+                e.preventDefault();
+                
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.classList.remove('d-none');
+                btnLoading.classList.add('d-none');
+                
+                // Show validation errors
+                if (!recipientAccount || recipientAccount.length !== 12) {
+                    accountField.classList.add('is-invalid');
+                    accountField.focus();
+                } else if (isNaN(amount) || amount < 0.01 || amount > availableBalance) {
+                    amountField.classList.add('is-invalid');
+                    amountField.focus();
+                }
+                
+                return false;
+            }
+        });
+    }
+    
+    // Auto-focus account field if enabled
+    if (accountField && !accountField.disabled) {
+        accountField.focus();
+    }
+});
 </script>
 {% endblock %}

@@ -1,0 +1,269 @@
+/* Bootstrap 5 Compatible Utilities for Banking Platform */
+
+/* CSS Custom Properties for Consistent Theming */
+:root {
+  /* Bootstrap 5 Color System Extensions */
+  --bs-primary-rgb: 13, 110, 253;
+  --bs-success-rgb: 25, 135, 84;
+  --bs-warning-rgb: 255, 193, 7;
+  --bs-danger-rgb: 220, 53, 69;
+  --bs-info-rgb: 13, 202, 240;
+  
+  /* Banking Platform Custom Properties */
+  --banking-primary: #0d6efd;
+  --banking-primary-dark: #0b5ed7;
+  --banking-success: #198754;
+  --banking-warning: #ffc107;
+  --banking-danger: #dc3545;
+  --banking-info: #0dcaf0;
+  
+  /* Spacing and Layout */
+  --banking-border-radius: 0.75rem;
+  --banking-border-radius-lg: 1rem;
+  --banking-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --banking-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  
+  /* Typography */
+  --banking-font-weight-medium: 500;
+  --banking-font-weight-semibold: 600;
+  
+  /* Transitions */
+  --banking-transition: all 0.15s ease-in-out;
+  --banking-transition-slow: all 0.3s ease-in-out;
+}
+
+/* Minimal Custom Utilities (Bootstrap 5 Compatible) */
+
+/* Enhanced Card Shadows */
+.shadow-banking {
+  box-shadow: var(--banking-shadow-lg) !important;
+}
+
+.shadow-banking-sm {
+  box-shadow: var(--banking-shadow) !important;
+}
+
+/* Custom Border Radius */
+.rounded-banking {
+  border-radius: var(--banking-border-radius) !important;
+}
+
+.rounded-banking-lg {
+  border-radius: var(--banking-border-radius-lg) !important;
+}
+
+/* Enhanced Button Hover Effects (Minimal Custom Enhancement) */
+.btn-hover-lift {
+  transition: var(--banking-transition-slow);
+}
+
+.btn-hover-lift:hover {
+  transform: translateY(-0.125rem);
+}
+
+/* Glass Effect Utility */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Loading State Utility */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: 50%;
+  left: 50%;
+  margin-left: -0.5rem;
+  margin-top: -0.5rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Enhanced Focus Indicators for Accessibility */
+.focus-ring-banking:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Transaction Status Indicators */
+.status-deposit {
+  color: var(--banking-success) !important;
+  border-left: 0.25rem solid var(--banking-success) !important;
+}
+
+.status-withdrawal {
+  color: var(--banking-danger) !important;
+  border-left: 0.25rem solid var(--banking-danger) !important;
+}
+
+.status-transfer {
+  color: var(--banking-warning) !important;
+  border-left: 0.25rem solid var(--banking-warning) !important;
+}
+
+/* Enhanced Form Validation (Bootstrap 5 Compatible) */
+.form-control.is-valid {
+  border-color: var(--banking-success);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.44 1.44L7.4 4.5l.94.94L4.66 9.2z'/%3e%3c/svg%3e");
+}
+
+.form-control.is-invalid {
+  border-color: var(--banking-danger);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.5 5.5 1 1m0-1-1 1'/%3e%3c/svg%3e");
+}
+
+/* Smooth Page Transitions */
+.page-transition {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Alert Animations */
+.alert-animated {
+  animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Navigation Enhancement */
+@media (max-width: 991.98px) {
+  .navbar-collapse-enhanced {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--banking-border-radius);
+    margin-top: 1rem;
+    padding: 1rem;
+    box-shadow: var(--banking-shadow-lg);
+  }
+  
+  .nav-link-mobile {
+    border-radius: 0.5rem;
+    margin: 0.125rem 0;
+    transition: var(--banking-transition);
+  }
+  
+  .nav-link-mobile:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    transform: translateX(0.5rem);
+  }
+}
+
+/* Enhanced Accessibility */
+.visually-hidden-focusable:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: 1050;
+}
+
+/* Modern Scrollbar (Webkit browsers) */
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bs-gray-100);
+  border-radius: 0.25rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--banking-primary);
+  border-radius: 0.25rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--banking-primary-dark);
+}
+
+/* Print Styles */
+@media print {
+  .navbar,
+  .btn,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none !important;
+    border: 1px solid var(--bs-gray-300) !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Dark Mode Support (Respects user preference) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --banking-shadow: 0 0.125rem 0.25rem rgba(255, 255, 255, 0.075);
+    --banking-shadow-lg: 0 0.5rem 1rem rgba(255, 255, 255, 0.15);
+  }
+  
+  .glass-effect {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bs-gray-800);
+  }
+}
+
+/* Reduced Motion Support (Accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .btn-hover-lift:hover {
+    transform: none;
+  }
+  
+  .page-transition,
+  .alert-animated {
+    animation: none;
+  }
+}

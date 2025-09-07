@@ -1,0 +1,193 @@
+<!-- Bootstrap 5 Utility Examples for Banking Platform -->
+<!-- This file demonstrates how to replace custom CSS with Bootstrap 5 utilities -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 5 Utility Examples</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="bootstrap-utilities.css">
+</head>
+<body class="bg-light min-vh-100">
+
+<!-- Navigation Example -->
+<nav class="navbar navbar-expand-lg bg-primary shadow">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold fs-4" href="#">BankApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-white rounded mx-1 px-3 nav-link-mobile" href="#">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white rounded mx-1 px-3 nav-link-mobile" href="#">Transactions</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section (replaces .jumbotron) -->
+<div class="container mt-4">
+    <div class="bg-primary text-white p-5 rounded-banking shadow-banking page-transition">
+        <h1 class="display-4 fw-bold mb-3">Welcome to Your Banking Dashboard</h1>
+        <p class="lead mb-4">Manage your finances with confidence and security.</p>
+        <a class="btn btn-light btn-lg btn-hover-lift" href="#">Get Started</a>
+    </div>
+</div>
+
+<!-- Dashboard Cards -->
+<div class="container mt-5">
+    <div class="row g-4">
+        <!-- Balance Card (replaces .dashboard-card) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card bg-success text-white shadow-banking h-100">
+                <div class="card-body text-center p-4">
+                    <h5 class="card-title fw-semibold">Current Balance</h5>
+                    <p class="display-3 fw-bold mb-0">$12,450.00</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature Cards (replaces .feature-card) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card text-center p-4 h-100 shadow-banking-sm btn-hover-lift">
+                <div class="card-body">
+                    <i class="bi bi-credit-card fs-1 text-primary mb-3"></i>
+                    <h5 class="card-title fw-semibold">Quick Transfer</h5>
+                    <p class="card-text text-muted">Send money instantly to any account</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <div class="card text-center p-4 h-100 shadow-banking-sm btn-hover-lift">
+                <div class="card-body">
+                    <i class="bi bi-graph-up fs-1 text-success mb-3"></i>
+                    <h5 class="card-title fw-semibold">Investment</h5>
+                    <p class="card-text text-muted">Grow your wealth with smart investments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction List -->
+<div class="container mt-5">
+    <div class="card shadow-banking">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-semibold">Recent Transactions</h5>
+        </div>
+        <div class="card-body p-0">
+            <!-- Transaction Items (replaces .transaction-item) -->
+            <div class="card mb-3 mx-3 mt-3 status-deposit">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Salary Deposit</h6>
+                            <small class="text-muted">Today, 2:30 PM</small>
+                        </div>
+                        <span class="text-success fw-bold">+$3,200.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-3 mx-3 status-withdrawal">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-semibold">ATM Withdrawal</h6>
+                            <small class="text-muted">Yesterday, 4:15 PM</small>
+                        </div>
+                        <span class="text-danger fw-bold">-$200.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-3 mx-3 status-transfer">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Transfer to John</h6>
+                            <small class="text-muted">Yesterday, 1:20 PM</small>
+                        </div>
+                        <span class="text-warning fw-bold">-$150.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Example -->
+<div class="container mt-5">
+    <div class="card shadow-banking">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-semibold">Quick Transfer</h5>
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control focus-ring-banking" id="recipient" placeholder="Recipient">
+                            <label for="recipient">Recipient Account</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="number" class="form-control focus-ring-banking" id="amount" placeholder="Amount">
+                            <label for="amount">Amount ($)</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea class="form-control focus-ring-banking" id="memo" placeholder="Memo" style="height: 100px"></textarea>
+                            <label for="memo">Memo (Optional)</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary btn-hover-lift">
+                            <i class="bi bi-send me-2"></i>Send Transfer
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts Example -->
+<div class="container mt-5">
+    <div class="alert alert-success alert-animated d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>Transfer completed successfully!</div>
+    </div>
+    
+    <div class="alert alert-warning alert-animated d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>Your account balance is running low.</div>
+    </div>
+</div>
+
+<!-- Loading Button Example -->
+<div class="container mt-5 mb-5">
+    <div class="card shadow-banking">
+        <div class="card-body text-center">
+            <h5 class="card-title">Loading States</h5>
+            <button class="btn btn-primary me-2">Normal Button</button>
+            <button class="btn btn-primary btn-loading me-2">Loading Button</button>
+            <button class="btn btn-success btn-hover-lift">Hover Effect</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,96 +1,219 @@
-/* Custom styles for Banking Platform */
+/* Bootstrap 5 Compatible Banking Platform Styles */
+/* 
+ * DEPRECATED: This file is maintained for backward compatibility only
+ * Use bootstrap-utilities.css for modern Bootstrap 5 compatible styles
+ * 
+ * Migration Guide:
+ * - Replace custom classes with Bootstrap 5 utility classes
+ * - Use CSS custom properties from bootstrap-utilities.css
+ * - Follow the migration guide in migration-guide.md
+ */
 
+:root {
+    /* Bootstrap 5 Compatible Variables */
+    --bs-primary: #0d6efd;
+    --bs-success: #198754;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-info: #0dcaf0;
+    
+    /* Backward Compatibility (Deprecated) */
+    --primary-color: var(--bs-primary);
+    --success-color: var(--bs-success);
+    --warning-color: var(--bs-warning);
+    --danger-color: var(--bs-danger);
+    --info-color: var(--bs-info);
+}
+
+/* Minimal Global Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    font-family: var(--bs-font-sans-serif);
 }
 
-.navbar-brand {
-    font-weight: bold;
-}
+/* Deprecated Classes - Use Bootstrap 5 Utilities Instead */
 
+/* 
+ * .jumbotron → .bg-primary .text-white .p-5 .rounded
+ * .dashboard-card → .card .bg-success .text-white .shadow
+ * .transaction-item → .card .mb-3 .border-start .border-4
+ * .feature-card → .card .text-center .p-4 .h-100 .shadow-sm
+ * .balance-display → .display-3 .fw-bold
+ * .btn-primary → .btn .btn-primary
+ * .form-control → .form-control (Bootstrap 5 native)
+ * .alert → .alert (Bootstrap 5 native)
+ * .badge → .badge (Bootstrap 5 native)
+ */
+
+/* Minimal Backward Compatibility */
 .jumbotron {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-    border: none;
-}
-
-.card {
-    transition: transform 0.2s ease-in-out;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.btn {
-    border-radius: 25px;
-    padding: 10px 25px;
-    font-weight: 500;
-}
-
-.alert {
-    border-radius: 10px;
-    border: none;
-}
-
-footer {
-    margin-top: auto;
-}
-
-/* Form styling */
-.form-control {
-    border-radius: 10px;
-    border: 1px solid #dee2e6;
-    padding: 12px 15px;
-}
-
-.form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-/* Dashboard specific styles */
-.dashboard-card {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    /* Use .bg-primary .text-white .p-5 .rounded instead */
+    background: var(--bs-primary);
     color: white;
-    border-radius: 15px;
+    padding: 3rem 2rem;
+    border-radius: 0.75rem;
 }
 
-.balance-display {
-    font-size: 2.5rem;
-    font-weight: bold;
+.dashboard-card {
+    /* Use .card .bg-success .text-white .shadow instead */
+    background: var(--bs-success);
+    color: white;
 }
 
-/* Transaction styles */
 .transaction-item {
-    border-left: 4px solid #007bff;
-    background-color: white;
-    margin-bottom: 10px;
-    border-radius: 0 10px 10px 0;
+    /* Use .card .mb-3 .border-start .border-4 .border-primary instead */
+    border-left: 4px solid var(--bs-primary);
+    margin-bottom: 0.75rem;
 }
 
 .transaction-deposit {
-    border-left-color: #28a745;
+    /* Use .border-success instead */
+    border-left-color: var(--bs-success);
 }
 
 .transaction-withdrawal {
-    border-left-color: #dc3545;
+    /* Use .border-danger instead */
+    border-left-color: var(--bs-danger);
 }
 
 .transaction-transfer {
-    border-left-color: #ffc107;
+    /* Use .border-warning instead */
+    border-left-color: var(--bs-warning);
 }
 
-/* Responsive adjustments */
+.feature-card {
+    /* Use .card .text-center .p-4 .h-100 .shadow-sm instead */
+    text-align: center;
+    padding: 2rem 1.5rem;
+    height: 100%;
+}
+
+.balance-display {
+    /* Use .display-3 .fw-bold instead */
+    font-size: 2.75rem;
+    font-weight: 800;
+}
+
+/* Utility Classes for Backward Compatibility */
+.glass-effect {
+    /* Kept for compatibility - also available in bootstrap-utilities.css */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.text-gradient {
+    /* Use .text-primary .fw-bold instead */
+    color: var(--bs-primary);
+    font-weight: 600;
+}
+
+/* Loading Animation - Minimal Version */
+.loading-shimmer {
+    /* Use Bootstrap 5 placeholder classes instead */
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
     .balance-display {
-        font-size: 2rem;
+        /* Use .fs-1 .fs-md-display-3 instead */
+        font-size: 2.25rem;
     }
     
     .jumbotron {
-        padding: 2rem 1rem;
+        /* Use .p-4 .p-md-5 instead */
+        padding: 2rem 1.5rem;
     }
 }
+
+@media (max-width: 576px) {
+    .balance-display {
+        /* Use responsive font size utilities instead */
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        /* Use .p-3 .p-md-4 instead */
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .btn,
+    footer {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    body {
+        background: white !important;
+    }
+}
+
+/* Modern Bootstrap 5 Enhancements */
+
+/* Hover Effects */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #0056b3 100%);
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+}
+
+/* Text Color Utilities */
+.text-white-75 {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Enhanced Button Styles */
+.btn-lg.rounded-pill {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+}
+
+/* Card Enhancements */
+.card.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Animation for smooth interactions */
+.card, .btn {
+    transition: all 0.3s ease;
+}
+
+/* 
+ * END OF DEPRECATED STYLES
+ * 
+ * For new development, use:
+ * 1. Bootstrap 5 utility classes
+ * 2. bootstrap-utilities.css for custom utilities
+ * 3. CSS custom properties for theming
+ * 
+ * See migration-guide.md for detailed migration instructions
+ */

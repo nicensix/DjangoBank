@@ -1,182 +1,371 @@
-{% extends 'accounts/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Register - Banking Platform{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0 text-center">Create Your Account</h4>
-            </div>
-            <div class="card-body">
-                <p class="text-muted text-center mb-4">
-                    Join our banking platform and get your account set up in minutes.
-                </p>
-                
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Personal Information -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                                First Name <span class="text-danger">*</span>
-                            </label>
-                            {{ form.first_name }}
-                            {% if form.first_name.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.first_name.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <!-- Main Registration Card -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-4 border-0">
+                    <div class="mb-3">
+                        <i class="fas fa-user-plus fa-3x opacity-75"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold">Create Your Account</h3>
+                    <p class="mb-0 opacity-90">Join our banking platform and get started in minutes</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <!-- Registration Form -->
+                    <form method="post" novalidate class="needs-validation" id="registrationForm">
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information Section -->
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-user me-2"></i>Personal Information
+                            </h6>
+                            <div class="row g-3">
+                                <!-- First Name -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input 
+                                            type="text" 
+                                            class="form-control{% if form.first_name.errors %} is-invalid{% endif %}" 
+                                            id="{{ form.first_name.id_for_label }}" 
+                                            name="{{ form.first_name.name }}"
+                                            value="{{ form.first_name.value|default:'' }}"
+                                            placeholder="First Name"
+                                            autocomplete="given-name"
+                                            required
+                                        >
+                                        <label for="{{ form.first_name.id_for_label }}">
+                                            First Name <span class="text-danger">*</span>
+                                        </label>
+                                        {% if form.first_name.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.first_name.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                                Last Name <span class="text-danger">*</span>
-                            </label>
-                            {{ form.last_name }}
-                            {% if form.last_name.errors %}
-                                <div class="text-danger small">
-                                    {% for error in form.last_name.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
+                                
+                                <!-- Last Name -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input 
+                                            type="text" 
+                                            class="form-control{% if form.last_name.errors %} is-invalid{% endif %}" 
+                                            id="{{ form.last_name.id_for_label }}" 
+                                            name="{{ form.last_name.name }}"
+                                            value="{{ form.last_name.value|default:'' }}"
+                                            placeholder="Last Name"
+                                            autocomplete="family-name"
+                                            required
+                                        >
+                                        <label for="{{ form.last_name.id_for_label }}">
+                                            Last Name <span class="text-danger">*</span>
+                                        </label>
+                                        {% if form.last_name.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.last_name.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            {% endif %}
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Username -->
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">
-                            Username <span class="text-danger">*</span>
-                        </label>
-                        {{ form.username }}
-                        {% if form.username.help_text %}
-                            <div class="form-text">{{ form.username.help_text }}</div>
-                        {% endif %}
-                        {% if form.username.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.username.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
+                        
+                        <!-- Account Information Section -->
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-id-card me-2"></i>Account Information
+                            </h6>
+                            
+                            <!-- Username -->
+                            <div class="form-floating mb-3">
+                                <input 
+                                    type="text" 
+                                    class="form-control{% if form.username.errors %} is-invalid{% endif %}" 
+                                    id="{{ form.username.id_for_label }}" 
+                                    name="{{ form.username.name }}"
+                                    value="{{ form.username.value|default:'' }}"
+                                    placeholder="Username"
+                                    autocomplete="username"
+                                    required
+                                >
+                                <label for="{{ form.username.id_for_label }}">
+                                    <i class="fas fa-user me-2"></i>Username <span class="text-danger">*</span>
+                                </label>
+                                {% if form.username.help_text %}
+                                    <div class="form-text">{{ form.username.help_text }}</div>
+                                {% endif %}
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Email -->
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">
-                            Email Address <span class="text-danger">*</span>
-                        </label>
-                        {{ form.email }}
-                        {% if form.email.help_text %}
-                            <div class="form-text">{{ form.email.help_text }}</div>
-                        {% endif %}
-                        {% if form.email.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.email.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
+                            
+                            <!-- Email -->
+                            <div class="form-floating mb-3">
+                                <input 
+                                    type="email" 
+                                    class="form-control{% if form.email.errors %} is-invalid{% endif %}" 
+                                    id="{{ form.email.id_for_label }}" 
+                                    name="{{ form.email.name }}"
+                                    value="{{ form.email.value|default:'' }}"
+                                    placeholder="Email Address"
+                                    autocomplete="email"
+                                    required
+                                >
+                                <label for="{{ form.email.id_for_label }}">
+                                    <i class="fas fa-envelope me-2"></i>Email Address <span class="text-danger">*</span>
+                                </label>
+                                {% if form.email.help_text %}
+                                    <div class="form-text">{{ form.email.help_text }}</div>
+                                {% endif %}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Account Type -->
-                    <div class="mb-3">
-                        <label for="{{ form.account_type.id_for_label }}" class="form-label">
-                            Account Type <span class="text-danger">*</span>
-                        </label>
-                        {{ form.account_type }}
-                        {% if form.account_type.help_text %}
-                            <div class="form-text">{{ form.account_type.help_text }}</div>
-                        {% endif %}
-                        {% if form.account_type.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.account_type.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
+                            
+                            <!-- Account Type -->
+                            <div class="mb-3">
+                                <label for="{{ form.account_type.id_for_label }}" class="form-label">
+                                    <i class="fas fa-university me-2"></i>Account Type <span class="text-danger">*</span>
+                                </label>
+                                <select 
+                                    class="form-select{% if form.account_type.errors %} is-invalid{% endif %}" 
+                                    id="{{ form.account_type.id_for_label }}" 
+                                    name="{{ form.account_type.name }}"
+                                    required
+                                >
+                                    {% for value, label in form.account_type.field.choices %}
+                                        <option value="{{ value }}" {% if form.account_type.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.account_type.help_text %}
+                                    <div class="form-text">{{ form.account_type.help_text }}</div>
+                                {% endif %}
+                                {% if form.account_type.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.account_type.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="{{ form.password1.id_for_label }}" class="form-label">
-                            Password <span class="text-danger">*</span>
-                        </label>
-                        {{ form.password1 }}
-                        {% if form.password1.help_text %}
-                            <div class="form-text">{{ form.password1.help_text }}</div>
-                        {% endif %}
-                        {% if form.password1.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.password1.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Confirm Password -->
-                    <div class="mb-4">
-                        <label for="{{ form.password2.id_for_label }}" class="form-label">
-                            Confirm Password <span class="text-danger">*</span>
-                        </label>
-                        {{ form.password2 }}
-                        {% if form.password2.help_text %}
-                            <div class="form-text">{{ form.password2.help_text }}</div>
-                        {% endif %}
-                        {% if form.password2.errors %}
-                            <div class="text-danger small">
-                                {% for error in form.password2.errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Non-field errors -->
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
                         </div>
-                    {% endif %}
+                        
+                        <!-- Security Section -->
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-lock me-2"></i>Security
+                            </h6>
+                            
+                            <!-- Password -->
+                            <div class="form-floating mb-3">
+                                <input 
+                                    type="password" 
+                                    class="form-control{% if form.password1.errors %} is-invalid{% endif %}" 
+                                    id="{{ form.password1.id_for_label }}" 
+                                    name="{{ form.password1.name }}"
+                                    placeholder="Password"
+                                    autocomplete="new-password"
+                                    required
+                                >
+                                <label for="{{ form.password1.id_for_label }}">
+                                    <i class="fas fa-key me-2"></i>Password <span class="text-danger">*</span>
+                                </label>
+                                {% if form.password1.help_text %}
+                                    <div class="form-text">{{ form.password1.help_text }}</div>
+                                {% endif %}
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password1.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Confirm Password -->
+                            <div class="form-floating mb-3">
+                                <input 
+                                    type="password" 
+                                    class="form-control{% if form.password2.errors %} is-invalid{% endif %}" 
+                                    id="{{ form.password2.id_for_label }}" 
+                                    name="{{ form.password2.name }}"
+                                    placeholder="Confirm Password"
+                                    autocomplete="new-password"
+                                    required
+                                >
+                                <label for="{{ form.password2.id_for_label }}">
+                                    <i class="fas fa-check-circle me-2"></i>Confirm Password <span class="text-danger">*</span>
+                                </label>
+                                {% if form.password2.help_text %}
+                                    <div class="form-text">{{ form.password2.help_text }}</div>
+                                {% endif %}
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password2.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Non-field errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg py-3" id="registerBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Create Account
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Creating Account...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
                     
-                    <!-- Submit Button -->
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            Create Account
-                        </button>
+                    <!-- Divider -->
+                    <div class="text-center">
+                        <div class="d-flex align-items-center my-4">
+                            <hr class="flex-grow-1">
+                            <span class="px-3 text-muted small">OR</span>
+                            <hr class="flex-grow-1">
+                        </div>
+                        
+                        <!-- Login Link -->
+                        <p class="mb-0">
+                            Already have an account? 
+                            <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-semibold">
+                                Sign in here
+                            </a>
+                        </p>
                     </div>
-                </form>
-                
-                <hr class="my-4">
-                
-                <div class="text-center">
-                    <p class="mb-0">
-                        Already have an account? 
-                        <a href="{% url 'accounts:login' %}" class="text-decoration-none">Sign in here</a>
-                    </p>
                 </div>
             </div>
-        </div>
-        
-        <!-- Information Card -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h6 class="card-title">What happens next?</h6>
-                <ul class="mb-0 small text-muted">
-                    <li>Your account will be created with a unique account number</li>
-                    <li>Your account will be pending approval initially</li>
-                    <li>You can log in immediately after registration</li>
-                    <li>Once approved, you can start making transactions</li>
-                </ul>
+            
+            <!-- Information Card -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="card-title text-primary">
+                        <i class="fas fa-info-circle me-2"></i>What happens next?
+                    </h6>
+                    <ul class="mb-0 small text-muted">
+                        <li class="mb-1">Your account will be created with a unique account number</li>
+                        <li class="mb-1">Your account will be pending approval initially</li>
+                        <li class="mb-1">You can log in immediately after registration</li>
+                        <li>Once approved, you can start making transactions</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registrationForm');
+    const submitBtn = document.getElementById('registerBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        btnText.classList.add('d-none');
+        btnLoading.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 5 seconds as fallback
+        setTimeout(function() {
+            btnText.classList.remove('d-none');
+            btnLoading.classList.add('d-none');
+            submitBtn.disabled = false;
+        }, 5000);
+    });
+    
+    // Enhanced form validation
+    const inputs = form.querySelectorAll('input[required], select[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
+    });
+    
+    // Password confirmation validation
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+    
+    if (password1 && password2) {
+        password2.addEventListener('input', function() {
+            if (password1.value !== password2.value) {
+                password2.classList.add('is-invalid');
+                password2.classList.remove('is-valid');
+            } else if (password2.value.length > 0) {
+                password2.classList.remove('is-invalid');
+                password2.classList.add('is-valid');
+            }
+        });
+    }
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        
+        if (field.hasAttribute('required') && value === '') {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+        } else if (field.type === 'email' && value !== '') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(value)) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            } else {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+            }
+        } else if (value !== '') {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        }
+    }
+});
+</script>
 {% endblock %}

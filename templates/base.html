@@ -1,71 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Secure modern banking platform with advanced features and user-friendly interface{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}banking, finance, secure, online banking, transactions{% endblock %}">
     <title>{% block title %}Banking Platform{% endblock %}</title>
     
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous">
     
     <!-- Custom CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_css %}{% endblock %}
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 </head>
-<body>
+<body class="d-flex flex-column h-100">
+    <!-- Skip to main content for accessibility -->
+    <a class="visually-hidden-focusable btn btn-primary position-absolute top-0 start-0 m-3" href="#main-content">
+        Skip to main content
+    </a>
+    
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'core:home' %}">
-                <i class="fas fa-university"></i> Banking Platform
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top" role="navigation" aria-label="Main navigation">
+        <div class="container-fluid px-3 px-lg-4">
+            <a class="navbar-brand fw-bold fs-4 text-decoration-none" href="{% url 'core:home' %}" aria-label="Banking Platform Home">
+                <i class="fas fa-university me-2" aria-hidden="true"></i>
+                <span class="d-none d-sm-inline">Banking Platform</span>
+                <span class="d-sm-none">Bank</span>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:home' %}">Home</a>
+                        <a class="nav-link px-3 py-2 rounded-2 mx-1 {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+                           href="{% url 'core:home' %}" aria-current="{% if request.resolver_match.url_name == 'home' %}page{% endif %}">
+                            <i class="fas fa-home me-1 d-lg-none" aria-hidden="true"></i>Home
+                        </a>
                     </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Dashboard</a>
+                            <a class="nav-link px-3 py-2 rounded-2 mx-1 {% if 'dashboard' in request.resolver_match.url_name %}active{% endif %}" 
+                               href="{% url 'accounts:dashboard' %}" aria-current="{% if 'dashboard' in request.resolver_match.url_name %}page{% endif %}">
+                                <i class="fas fa-tachometer-alt me-1 d-lg-none" aria-hidden="true"></i>Dashboard
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Transactions</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 py-2 rounded-2 mx-1 {% if 'transactions' in request.resolver_match.namespace %}active{% endif %}" 
+                               href="#" id="transactionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-exchange-alt me-1 d-lg-none" aria-hidden="true"></i>Transactions
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-lg mt-2" aria-labelledby="transactionsDropdown">
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'transactions:deposit' %}">
+                                    <i class="fas fa-plus-circle text-success me-2" aria-hidden="true"></i>Deposit
+                                </a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'transactions:withdrawal' %}">
+                                    <i class="fas fa-minus-circle text-warning me-2" aria-hidden="true"></i>Withdraw
+                                </a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'transactions:transfer' %}">
+                                    <i class="fas fa-arrow-right-arrow-left text-info me-2" aria-hidden="true"></i>Transfer
+                                </a></li>
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'transactions:history' %}">
+                                    <i class="fas fa-history text-secondary me-2" aria-hidden="true"></i>Transaction History
+                                </a></li>
+                            </ul>
                         </li>
                         {% if user.is_staff or user.is_superuser %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin_panel:dashboard' %}">
-                                    <i class="fas fa-cog"></i> Admin Panel
+                                <a class="nav-link px-3 py-2 rounded-2 mx-1 {% if 'admin_panel' in request.resolver_match.namespace %}active{% endif %}" 
+                                   href="{% url 'admin_panel:dashboard' %}" aria-current="{% if 'admin_panel' in request.resolver_match.namespace %}page{% endif %}">
+                                    <i class="fas fa-cog me-1" aria-hidden="true"></i>
+                                    <span class="d-none d-xl-inline">Admin Panel</span>
+                                    <span class="d-xl-none">Admin</span>
                                 </a>
                             </li>
                         {% endif %}
                     {% endif %}
                 </ul>
                 
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user"></i> {{ user.username }}
+                            <a class="nav-link dropdown-toggle px-3 py-2 rounded-2 d-flex align-items-center" 
+                               href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-1 me-2">
+                                    <i class="fas fa-user text-white" aria-hidden="true"></i>
+                                </div>
+                                <span class="fw-medium">{{ user.get_full_name|default:user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">Logout</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2" aria-labelledby="userDropdown">
+                                <li class="px-3 py-2 border-bottom">
+                                    <small class="text-muted">Signed in as</small><br>
+                                    <strong>{{ user.username }}</strong>
+                                </li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'accounts:dashboard' %}">
+                                    <i class="fas fa-user-circle me-2" aria-hidden="true"></i>My Profile
+                                </a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'transactions:history' %}">
+                                    <i class="fas fa-history me-2" aria-hidden="true"></i>My Transactions
+                                </a></li>
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li><a class="dropdown-item py-2 px-3 text-danger" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2" aria-hidden="true"></i>Sign Out
+                                </a></li>
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Login</a>
+                        <li class="nav-item me-2">
+                            <a class="nav-link px-3 py-2 rounded-2" href="{% url 'accounts:login' %}">
+                                <i class="fas fa-sign-in-alt me-1 d-lg-none" aria-hidden="true"></i>Sign In
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Register</a>
+                            <a class="btn btn-outline-light btn-sm px-3 py-2 rounded-2" href="{% url 'accounts:register' %}">
+                                <i class="fas fa-user-plus me-1" aria-hidden="true"></i>Get Started
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -75,40 +145,547 @@
 
     <!-- Messages -->
     {% if messages %}
-        <div class="container mt-3">
+        <div class="container-fluid px-3 px-lg-4 mt-3" id="messages-container">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 shadow-sm d-flex align-items-center" 
+                     role="alert" aria-live="polite">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle text-success me-3 fs-5" aria-hidden="true"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fas fa-exclamation-triangle text-danger me-3 fs-5" aria-hidden="true"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-circle text-warning me-3 fs-5" aria-hidden="true"></i>
+                    {% elif message.tags == 'info' %}
+                        <i class="fas fa-info-circle text-info me-3 fs-5" aria-hidden="true"></i>
+                    {% else %}
+                        <i class="fas fa-bell text-primary me-3 fs-5" aria-hidden="true"></i>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        {{ message }}
+                    </div>
+                    <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
     <!-- Main Content -->
-    <main class="container mt-4">
+    <main class="flex-grow-1 container-fluid px-3 px-lg-4 py-4" id="main-content" role="main">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light mt-5 py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p>&copy; 2024 Banking Platform. All rights reserved.</p>
+    <footer class="bg-dark text-light py-5 mt-auto" role="contentinfo">
+        <div class="container-fluid px-3 px-lg-4">
+            <div class="row g-4 g-lg-5">
+                <!-- Brand Section -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-20 rounded-3 p-3 me-3">
+                            <i class="fas fa-university text-primary fa-2x" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1 text-white fw-bold">Banking Platform</h5>
+                            <small class="text-white-50 fw-medium">Secure Banking Solutions</small>
+                        </div>
+                    </div>
+                    <p class="text-white-50 mb-4 lh-lg">Your trusted partner for modern banking services with cutting-edge security, innovative features, and exceptional user experience.</p>
+                    
+                    <!-- Security Badges -->
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="bg-success bg-opacity-20 rounded-3 p-3 text-center" title="Bank-Grade Security">
+                            <i class="fas fa-shield-alt text-success fs-5" aria-hidden="true"></i>
+                            <div class="small text-success fw-medium mt-1">Secure</div>
+                        </div>
+                        <div class="bg-info bg-opacity-20 rounded-3 p-3 text-center" title="SSL Encrypted">
+                            <i class="fas fa-lock text-info fs-5" aria-hidden="true"></i>
+                            <div class="small text-info fw-medium mt-1">Encrypted</div>
+                        </div>
+                        <div class="bg-warning bg-opacity-20 rounded-3 p-3 text-center" title="FDIC Insured">
+                            <i class="fas fa-certificate text-warning fs-5" aria-hidden="true"></i>
+                            <div class="small text-warning fw-medium mt-1">Insured</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <p>Secure Banking Solutions</p>
+                
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-white fw-semibold mb-3 pb-1 border-bottom border-primary border-opacity-25">Services</h6>
+                    <ul class="list-unstyled">
+                        {% if user.is_authenticated %}
+                            <li class="mb-2">
+                                <a href="{% url 'accounts:dashboard' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-tachometer-alt me-2 text-primary" aria-hidden="true"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'transactions:deposit' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-plus-circle me-2 text-success" aria-hidden="true"></i>Deposit
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'transactions:transfer' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-exchange-alt me-2 text-info" aria-hidden="true"></i>Transfer
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'transactions:history' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-history me-2 text-secondary" aria-hidden="true"></i>History
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="mb-2">
+                                <a href="{% url 'core:home' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-home me-2 text-primary" aria-hidden="true"></i>Home
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'accounts:login' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-sign-in-alt me-2 text-success" aria-hidden="true"></i>Sign In
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="{% url 'accounts:register' %}" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                    <i class="fas fa-user-plus me-2 text-info" aria-hidden="true"></i>Register
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <!-- Security & Legal -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-white fw-semibold mb-3 pb-1 border-bottom border-primary border-opacity-25">Security</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                <i class="fas fa-shield-alt me-2 text-success" aria-hidden="true"></i>SSL Protection
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                <i class="fas fa-user-shield me-2 text-info" aria-hidden="true"></i>Fraud Prevention
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                <i class="fas fa-file-contract me-2 text-warning" aria-hidden="true"></i>Privacy Policy
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none d-flex align-items-center py-1 hover-link">
+                                <i class="fas fa-gavel me-2 text-secondary" aria-hidden="true"></i>Terms of Service
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Contact & Support -->
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="text-white fw-semibold mb-3 pb-1 border-bottom border-primary border-opacity-25">Contact & Support</h6>
+                    
+                    <!-- Contact Info -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-20 rounded-2 p-2 me-3">
+                                <i class="fas fa-clock text-primary" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <div class="text-white fw-medium">24/7 Customer Support</div>
+                                <small class="text-white-50">Always here to help</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success bg-opacity-20 rounded-2 p-2 me-3">
+                                <i class="fas fa-phone text-success" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <div class="text-white fw-medium">1-800-BANKING</div>
+                                <small class="text-white-50">Toll-free support line</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-info bg-opacity-20 rounded-2 p-2 me-3">
+                                <i class="fas fa-envelope text-info" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <div class="text-white fw-medium">support@bankingplatform.com</div>
+                                <small class="text-white-50">Email support</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FDIC Badge -->
+                    <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 p-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shield-alt text-success me-3 fs-4" aria-hidden="true"></i>
+                            <div>
+                                <div class="text-white fw-semibold">FDIC Insured</div>
+                                <small class="text-success">Equal Housing Lender</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <hr class="my-5 border-white border-opacity-25">
+            <div class="row align-items-center g-3">
+                <div class="col-md-6">
+                    <p class="text-white-50 mb-0">
+                        <i class="fas fa-copyright me-1" aria-hidden="true"></i>
+                        2024 Banking Platform. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <div class="bg-success bg-opacity-20 rounded-2 p-1 me-2">
+                            <i class="fas fa-lock text-success" aria-hidden="true"></i>
+                        </div>
+                        <small class="text-white-50">
+                            256-bit SSL encryption protects your data
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
-    <!-- Font Awesome -->
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <!-- Enhanced Custom JavaScript -->
+    <script>
+        // Banking Platform Enhanced UI JavaScript
+        (function() {
+            'use strict';
+
+            // Initialize when DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeEnhancements();
+            });
+
+            function initializeEnhancements() {
+                setupSmoothScrolling();
+                setupFormEnhancements();
+                setupAlertManagement();
+                setupNavigationEnhancements();
+                setupAccessibilityFeatures();
+                setupPerformanceOptimizations();
+            }
+
+            // Enhanced smooth scrolling with offset for fixed navbar
+            function setupSmoothScrolling() {
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            e.preventDefault();
+                            const navbarHeight = document.querySelector('.navbar').offsetHeight;
+                            const targetPosition = target.offsetTop - navbarHeight - 20;
+                            
+                            window.scrollTo({
+                                top: targetPosition,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Enhanced form handling with better UX
+            function setupFormEnhancements() {
+                document.querySelectorAll('form').forEach(form => {
+                    // Form submission with loading states
+                    form.addEventListener('submit', function(e) {
+                        const submitBtn = this.querySelector('button[type="submit"], input[type="submit"]');
+                        if (submitBtn && !submitBtn.disabled) {
+                            // Store original content
+                            const originalContent = submitBtn.innerHTML || submitBtn.value;
+                            const isButton = submitBtn.tagName === 'BUTTON';
+                            
+                            // Add loading state
+                            if (isButton) {
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>Processing...';
+                            } else {
+                                submitBtn.value = 'Processing...';
+                            }
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('btn-loading');
+                            
+                            // Reset after timeout (fallback)
+                            setTimeout(() => {
+                                if (isButton) {
+                                    submitBtn.innerHTML = originalContent;
+                                } else {
+                                    submitBtn.value = originalContent;
+                                }
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('btn-loading');
+                            }, 10000);
+                        }
+                    });
+
+                    // Real-time form validation feedback
+                    const inputs = form.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.addEventListener('blur', function() {
+                            validateField(this);
+                        });
+                        
+                        input.addEventListener('input', function() {
+                            if (this.classList.contains('is-invalid')) {
+                                validateField(this);
+                            }
+                        });
+                    });
+                });
+
+                // Enhanced floating labels
+                document.querySelectorAll('.form-floating input, .form-floating textarea').forEach(input => {
+                    input.addEventListener('focus', function() {
+                        this.parentElement.classList.add('focused');
+                    });
+                    
+                    input.addEventListener('blur', function() {
+                        if (!this.value) {
+                            this.parentElement.classList.remove('focused');
+                        }
+                    });
+                });
+            }
+
+            // Field validation helper
+            function validateField(field) {
+                const isValid = field.checkValidity();
+                field.classList.toggle('is-valid', isValid && field.value);
+                field.classList.toggle('is-invalid', !isValid && field.value);
+                
+                // Show custom validation message
+                const feedback = field.parentElement.querySelector('.invalid-feedback');
+                if (feedback && !isValid && field.value) {
+                    feedback.textContent = field.validationMessage;
+                }
+            }
+
+            // Enhanced alert management
+            function setupAlertManagement() {
+                // Auto-hide success alerts
+                setTimeout(() => {
+                    document.querySelectorAll('.alert-success').forEach(alert => {
+                        fadeOutAlert(alert);
+                    });
+                }, 5000);
+
+                // Add close animation to all alerts
+                document.querySelectorAll('.alert .btn-close').forEach(closeBtn => {
+                    closeBtn.addEventListener('click', function() {
+                        const alert = this.closest('.alert');
+                        fadeOutAlert(alert);
+                    });
+                });
+            }
+
+            function fadeOutAlert(alert) {
+                alert.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 500);
+            }
+
+            // Navigation enhancements
+            function setupNavigationEnhancements() {
+                const navbar = document.querySelector('.navbar');
+                const navbarToggler = document.querySelector('.navbar-toggler');
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+
+                // Enhanced mobile menu behavior
+                if (navbarToggler && navbarCollapse) {
+                    navbarToggler.addEventListener('click', function() {
+                        // Add animation class
+                        navbarCollapse.classList.add('collapsing-enhanced');
+                        
+                        setTimeout(() => {
+                            navbarCollapse.classList.remove('collapsing-enhanced');
+                        }, 350);
+                    });
+
+                    // Close mobile menu when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!navbar.contains(e.target) && navbarCollapse.classList.contains('show')) {
+                            const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                                toggle: false
+                            });
+                            bsCollapse.hide();
+                        }
+                    });
+                }
+
+                // Add scroll behavior to navbar
+                let lastScrollTop = 0;
+                window.addEventListener('scroll', function() {
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    if (scrollTop > lastScrollTop && scrollTop > 100) {
+                        // Scrolling down
+                        navbar.style.transform = 'translateY(-100%)';
+                    } else {
+                        // Scrolling up
+                        navbar.style.transform = 'translateY(0)';
+                    }
+                    lastScrollTop = scrollTop;
+                }, { passive: true });
+
+                // Highlight active navigation items
+                highlightActiveNavItem();
+            }
+
+            function highlightActiveNavItem() {
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    const linkPath = new URL(link.href).pathname;
+                    if (linkPath === currentPath) {
+                        link.classList.add('active');
+                        link.setAttribute('aria-current', 'page');
+                    }
+                });
+            }
+
+            // Accessibility enhancements
+            function setupAccessibilityFeatures() {
+                // Enhanced keyboard navigation
+                document.addEventListener('keydown', function(e) {
+                    // Skip to main content with Alt+M
+                    if (e.altKey && e.key === 'm') {
+                        e.preventDefault();
+                        const mainContent = document.getElementById('main-content');
+                        if (mainContent) {
+                            mainContent.focus();
+                            mainContent.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+
+                // Improve focus indicators
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Tab') {
+                        document.body.classList.add('keyboard-navigation');
+                    }
+                });
+
+                document.addEventListener('mousedown', function() {
+                    document.body.classList.remove('keyboard-navigation');
+                });
+
+                // Announce dynamic content changes to screen readers
+                const messagesContainer = document.getElementById('messages-container');
+                if (messagesContainer) {
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                                // Announce new messages
+                                mutation.addedNodes.forEach(function(node) {
+                                    if (node.nodeType === 1 && node.classList.contains('alert')) {
+                                        announceToScreenReader(node.textContent.trim());
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    observer.observe(messagesContainer, { childList: true });
+                }
+            }
+
+            function announceToScreenReader(message) {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = message;
+                document.body.appendChild(announcement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(announcement);
+                }, 1000);
+            }
+
+            // Performance optimizations
+            function setupPerformanceOptimizations() {
+                // Lazy load images when they come into view
+                if ('IntersectionObserver' in window) {
+                    const imageObserver = new IntersectionObserver((entries, observer) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                if (img.dataset.src) {
+                                    img.src = img.dataset.src;
+                                    img.classList.remove('lazy');
+                                    observer.unobserve(img);
+                                }
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('img[data-src]').forEach(img => {
+                        imageObserver.observe(img);
+                    });
+                }
+
+                // Preload critical resources
+                const criticalLinks = document.querySelectorAll('a[href*="dashboard"], a[href*="transactions"]');
+                criticalLinks.forEach(link => {
+                    link.addEventListener('mouseenter', function() {
+                        const prefetchLink = document.createElement('link');
+                        prefetchLink.rel = 'prefetch';
+                        prefetchLink.href = this.href;
+                        document.head.appendChild(prefetchLink);
+                    }, { once: true });
+                });
+            }
+
+            // Utility functions
+            window.BankingPlatform = {
+                // Show loading state on any element
+                showLoading: function(element, message = 'Loading...') {
+                    element.classList.add('loading');
+                    element.setAttribute('data-original-content', element.innerHTML);
+                    element.innerHTML = `<i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>${message}`;
+                    element.disabled = true;
+                },
+
+                // Hide loading state
+                hideLoading: function(element) {
+                    element.classList.remove('loading');
+                    element.innerHTML = element.getAttribute('data-original-content') || element.innerHTML;
+                    element.disabled = false;
+                    element.removeAttribute('data-original-content');
+                },
+
+                // Show toast notification
+                showToast: function(message, type = 'info') {
+                    const toast = document.createElement('div');
+                    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+                    toast.style.zIndex = '9999';
+                    toast.innerHTML = `
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    document.body.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        fadeOutAlert(toast);
+                    }, 5000);
+                }
+            };
+
+        })();
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

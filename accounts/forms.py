@@ -66,21 +66,41 @@ class UserRegistrationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Add CSS classes and placeholders to inherited fields
+        # Add CSS classes and placeholders to inherited fields for Bootstrap 5 floating labels
         self.fields['username'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Choose a username',
+            'placeholder': 'Username',
             'autocomplete': 'username'
         })
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Enter password',
+            'placeholder': 'Password',
             'autocomplete': 'new-password'
         })
         self.fields['password2'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Confirm password',
+            'placeholder': 'Confirm Password',
             'autocomplete': 'new-password'
+        })
+        
+        # Update form field widgets for Bootstrap 5 compatibility
+        self.fields['first_name'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'First Name',
+            'autocomplete': 'given-name'
+        })
+        self.fields['last_name'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Last Name',
+            'autocomplete': 'family-name'
+        })
+        self.fields['email'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Email Address',
+            'autocomplete': 'email'
+        })
+        self.fields['account_type'].widget.attrs.update({
+            'class': 'form-select'
         })
         
         # Update help texts with security requirements
@@ -215,7 +235,7 @@ class UserLoginForm(forms.Form, RateLimitMixin):
         required=True,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter your username',
+            'placeholder': 'Username',
             'autocomplete': 'username'
         }),
         help_text='Enter your username.'
@@ -225,7 +245,7 @@ class UserLoginForm(forms.Form, RateLimitMixin):
         required=True,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter your password',
+            'placeholder': 'Password',
             'autocomplete': 'current-password'
         }),
         help_text='Enter your password.'
